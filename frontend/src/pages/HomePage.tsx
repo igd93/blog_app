@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useNavigate } from "react-router-dom";
 
 interface BlogPost {
   id: string;
@@ -36,6 +37,8 @@ const mockBlogPosts: BlogPost[] = [
 ];
 
 export default function HomePage() {
+  const navigate = useNavigate();
+
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-4xl font-bold mb-8">Blog Posts</h1>
@@ -43,7 +46,11 @@ export default function HomePage() {
       <ScrollArea className="h-[800px] w-full rounded-md border p-4">
         <div className="grid gap-4">
           {mockBlogPosts.map((post) => (
-            <Card key={post.id} className="cursor-pointer hover:bg-accent">
+            <Card
+              key={post.id}
+              className="cursor-pointer hover:bg-accent"
+              onClick={() => navigate(`/blog/${post.id}`)}
+            >
               <CardHeader>
                 <CardTitle>{post.title}</CardTitle>
                 <CardDescription>
