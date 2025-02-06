@@ -126,7 +126,6 @@ export default function Header() {
                 <Button variant="ghost" onClick={() => navigate("/login")}>
                   Log in
                 </Button>
-                <Button onClick={() => navigate("/register")}>Sign up</Button>
               </>
             )}
           </div>
