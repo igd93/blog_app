@@ -9,6 +9,9 @@
     - [x] LoginPage
     - [x] RegisterPage
     - [x] ProfilePage
+    - [x] Header
+  - [x] Setup the backend
+    - [x] installed spring boot
 
 ## What needs to be done
 
