@@ -1,3 +1,9 @@
 databaseChangeLog:
   - include:
-      file: db/changelog/changes/001-initial-schema.yaml
+      file: db/changelog/changes/001-create-users.yaml
+  - include:
+      file: db/changelog/changes/002-create-blog-posts.yaml
+  - include:
+      file: db/changelog/changes/003-create-comments.yaml
+  - include:
+      file: db/changelog/changes/004-create-tags.yaml

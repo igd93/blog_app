@@ -1,1 +1,48 @@
- 
+databaseChangeLog:
+  - changeSet:
+      id: "004"
+      author: dev
+      changes:
+        - createTable:
+            tableName: tags
+            columns:
+              - column:
+                  name: id
+                  type: varchar(36)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: slug
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+        - createTable:
+            tableName: post_tags
+            columns:
+              - column:
+                  name: post_id
+                  type: varchar(36)
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_posttag_post
+                    references: blog_posts(id)
+              - column:
+                  name: tag_id
+                  type: varchar(36)
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_posttag_tag
+                    references: tags(id)
+            constraints:
+              - primaryKey:
+                  columnNames: [post_id, tag_id]
+                  constraintName: pk_post_tags
