@@ -106,6 +106,11 @@ export default function BlogDetailPage() {
     }
   };
 
+  useEffect(() => {
+    // TODO: Fetch blog post using id
+    console.log("Blog post id:", id);
+  }, [id]);
+
   return (
     <>
       {/* Reading Progress Bar */}
