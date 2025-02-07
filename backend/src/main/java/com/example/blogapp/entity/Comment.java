@@ -13,7 +13,7 @@ import java.util.UUID;
 @Table(name = "comments")
 public class Comment extends BaseEntity {
     @Id
-    @UuidGenerator
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)

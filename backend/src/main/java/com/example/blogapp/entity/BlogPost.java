@@ -3,7 +3,8 @@ package com.example.blogapp.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -12,11 +13,11 @@ import java.util.UUID;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Entity
+@Entity(name = "blog_post")
 @Table(name = "blog_posts")
 public class BlogPost extends BaseEntity {
     @Id
-    @UuidGenerator
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false)
@@ -38,16 +39,13 @@ public class BlogPost extends BaseEntity {
     private String status;
 
     @Column(name = "post_date")
+    @JdbcTypeCode(SqlTypes.TIMESTAMP)
     private LocalDateTime postDate;
 
     @Column(name = "read_time")
     private String readTime;
 
     @ManyToMany
-    @JoinTable(
-        name = "post_tags",
-        joinColumns = @JoinColumn(name = "post_id"),
-        inverseJoinColumns = @JoinColumn(name = "tag_id")
-    )
+    @JoinTable(name = "post_tags", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private Set<Tag> tags = new HashSet<>();
-} 
+}

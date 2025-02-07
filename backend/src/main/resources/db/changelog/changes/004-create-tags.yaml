@@ -8,7 +8,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: id
-                  type: varchar(36)
+                  type: uuid
                   constraints:
                     primaryKey: true
                     nullable: false
@@ -30,14 +30,14 @@ databaseChangeLog:
             columns:
               - column:
                   name: post_id
-                  type: varchar(36)
+                  type: uuid
                   constraints:
                     nullable: false
                     foreignKeyName: fk_posttag_post
                     references: blog_posts(id)
               - column:
                   name: tag_id
-                  type: varchar(36)
+                  type: uuid
                   constraints:
                     nullable: false
                     foreignKeyName: fk_posttag_tag
