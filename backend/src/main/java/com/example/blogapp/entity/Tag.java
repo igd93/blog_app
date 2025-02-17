@@ -2,8 +2,6 @@ package com.example.blogapp.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.UuidGenerator;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;

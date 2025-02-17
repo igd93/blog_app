@@ -3,8 +3,6 @@ package com.example.blogapp.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.hibernate.annotations.UuidGenerator;
-
 import java.util.UUID;
 
 @Data
