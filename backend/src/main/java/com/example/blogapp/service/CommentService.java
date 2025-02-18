@@ -2,6 +2,8 @@ package com.example.blogapp.service;
 
 import com.example.blogapp.entity.Comment;
 import com.example.blogapp.entity.BlogPost;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,7 +17,7 @@ public interface CommentService {
 
     Optional<Comment> getCommentById(UUID id);
 
-    List<Comment> getCommentsByPost(BlogPost post);
+    Page<Comment> getCommentsByPost(BlogPost post, Pageable pageable);
 
     long getCommentCount(BlogPost post);
 
