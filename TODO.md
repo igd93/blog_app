@@ -50,11 +50,11 @@
     - [x] PUT /api/posts/{id}
     - [x] DELETE /api/posts/{id}
 
-  - [ ] Users:
+  - [x] Users:
 
-    - [ ] GET /api/users/profile
-    - [ ] PUT /api/users/profile
-    - [ ] PUT /api/users/password
+    - [x] GET /api/users/profile
+    - [x] PUT /api/users/profile
+    - [x] PUT /api/users/password
 
   - [x] Comments:
 
