@@ -18,6 +18,7 @@
   - [x] created the repository interfaces
   - [x] created the service interfaces
   - [x] created the service implementations
+  - [x] created the DTOs
 
 ## What needs to be done
 
@@ -73,11 +74,11 @@
     - [ ] UserController (profile operations)
     - [ ] CommentController
     - [ ] TagController
-    - [ ] Create DTOs:
-      - [ ] UserDTO (for registration and profile)
-      - [ ] BlogPostDTO
-      - [ ] CommentDTO
-      - [ ] TagDTO
+    - [x] Create DTOs:
+      - [x] UserDTO (for registration and profile)
+      - [x] BlogPostDTO
+      - [x] CommentDTO
+      - [x] TagDTO
     - [x] Create Services:
       - [x] AuthService
       - [x] BlogService
