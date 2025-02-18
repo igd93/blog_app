@@ -12,6 +12,12 @@
     - [x] Header
 - [x] Setup the DB
   - [x] Setup the schema
+- [x] Setup the backend
+  - [x] created spring boot project
+  - [x] created the entity classes
+  - [x] created the repository interfaces
+  - [x] created the service interfaces
+  - [x] created the service implementations
 
 ## What needs to be done
 
@@ -72,12 +78,17 @@
       - [ ] BlogPostDTO
       - [ ] CommentDTO
       - [ ] TagDTO
-    - [ ] Create Services:
-      - [ ] AuthService
-      - [ ] BlogService
-      - [ ] UserService
-      - [ ] CommentService
-      - [ ] TagService
+    - [x] Create Services:
+      - [x] AuthService
+      - [x] BlogService
+      - [x] UserService
+      - [x] CommentService
+      - [x] TagService
+    - [x] Create Repositories:
+      - [x] UserRepository
+      - [x] BlogPostRepository
+      - [x] CommentRepository
+      - [x] TagRepository
     - [ ] Setup the authentication
       - [ ] Spring Security configuration
       - [ ] JWT token implementation
