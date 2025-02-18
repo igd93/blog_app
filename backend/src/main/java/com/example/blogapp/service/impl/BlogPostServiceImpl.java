@@ -5,6 +5,8 @@ import com.example.blogapp.entity.User;
 import com.example.blogapp.repository.BlogPostRepository;
 import com.example.blogapp.service.BlogPostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,8 +67,8 @@ public class BlogPostServiceImpl implements BlogPostService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BlogPost> getAllPosts() {
-        return blogPostRepository.findAll();
+    public Page<BlogPost> getAllPosts(Pageable pageable) {
+        return blogPostRepository.findAll(pageable);
     }
 
     @Override
@@ -96,4 +98,5 @@ public class BlogPostServiceImpl implements BlogPostService {
 
         return slug;
     }
+
 }

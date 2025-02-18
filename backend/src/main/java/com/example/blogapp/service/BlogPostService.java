@@ -5,6 +5,8 @@ import com.example.blogapp.entity.User;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface BlogPostService {
     BlogPost createPost(BlogPost post);
@@ -21,9 +23,9 @@ public interface BlogPostService {
 
     List<BlogPost> getPostsByStatus(String status);
 
-    List<BlogPost> getAllPosts();
-
     boolean existsBySlug(String slug);
 
     String generateSlug(String title);
+
+    Page<BlogPost> getAllPosts(Pageable pageable);
 }
