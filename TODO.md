@@ -42,13 +42,13 @@
     - [ ] POST /api/auth/login
     - [ ] POST /api/auth/logout
 
-  - [ ] Blog Posts:
+  - [x] Blog Posts:
 
-    - [ ] GET /api/posts
-    - [ ] GET /api/posts/{id}
-    - [ ] POST /api/posts
-    - [ ] PUT /api/posts/{id}
-    - [ ] DELETE /api/posts/{id}
+    - [x] GET /api/posts
+    - [x] GET /api/posts/{id}
+    - [x] POST /api/posts
+    - [x] PUT /api/posts/{id}
+    - [x] DELETE /api/posts/{id}
 
   - [ ] Users:
 
@@ -56,24 +56,24 @@
     - [ ] PUT /api/users/profile
     - [ ] PUT /api/users/password
 
-  - [ ] Comments:
+  - [x] Comments:
 
-    - [ ] GET /api/posts/{postId}/comments
-    - [ ] POST /api/posts/{postId}/comments
-    - [ ] PUT /api/comments/{id}
-    - [ ] DELETE /api/comments/{id}
+    - [x] GET /api/posts/{postId}/comments
+    - [x] POST /api/posts/{postId}/comments
+    - [x] PUT /api/comments/{id}
+    - [x] DELETE /api/comments/{id}
 
-  - [ ] Tags:
+  - [x] Tags:
 
-    - [ ] GET /api/tags
-    - [ ] POST /api/tags
+    - [x] GET /api/tags
+    - [x] POST /api/tags
 
   - [ ] Create REST Controllers:
     - [ ] AuthController (login, register, logout)
-    - [ ] BlogController (CRUD operations for posts)
+    - [x] BlogController (CRUD operations for posts)
     - [ ] UserController (profile operations)
-    - [ ] CommentController
-    - [ ] TagController
+    - [x] CommentController
+    - [x] TagController
     - [x] Create DTOs:
       - [x] UserDTO (for registration and profile)
       - [x] BlogPostDTO
