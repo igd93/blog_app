@@ -10,19 +10,46 @@
     - [x] RegisterPage
     - [x] ProfilePage
     - [x] Header
-  - [x] Setup the backend
-    - [x] installed spring boot
+  - [ ] Create API Client:
+    - [ ] Set up axios with interceptors
+    - [ ] Create API service classes
+  - [ ] Update Components:
+    - [] Connect LoginPage to backend
+    - [] Connect RegisterPage to backend
+    - [] Connect HomePage to fetch posts
+    - [] Connect BlogDetailPage to fetch post details
+    - [] Connect ProfilePage to user data
+    - [] Setup the backend
+- [x] Setup the DB
+  - [x] Setup the schema
 
 ## What needs to be done
 
-- [ ] Setup the backend
-- [ ] Setup the DB
+- [x] The backend
+  - [ ] Create REST Controllers:
+    - [ ] AuthController (login, register, logout)
+    - [ ] BlogController (CRUD operations for posts)
+    - [ ] UserController (profile operations)
+    - [ ] CommentController
+    - [ ] TagController
+  - [ ] Create DTOs:
+    - [ ] UserDTO (for registration and profile)
+    - [ ] BlogPostDTO
+    - [ ] CommentDTO
+    - [ ] TagDTO
+  - [ ] Create Services:
+    - [ ] AuthService
+    - [ ] BlogService
+    - [ ] UserService
+    - [ ] CommentService
+    - [ ] TagService
 - [ ] Setup the authentication
+  - [ ] Spring Security configuration
+  - [ ] JWT token implementation
 - [ ] Setup the authorization
-- [ ] Setup the validation
+  - [ ] Role-based authorization
 - [ ] Setup the logging
 - [ ] Setup the testing
 - [ ] Set up the CI/CD pipeline
 - [ ] Set up the deployment
 - [ ] Set up the monitoring
-- [ ] Set up the logging
