@@ -4,6 +4,8 @@ import com.example.blogapp.entity.Tag;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 public interface TagService {
     Tag createTag(Tag tag);
@@ -23,4 +25,6 @@ public interface TagService {
     boolean existsByName(String name);
 
     String generateSlug(String name);
+
+    Page<Tag> getAllTags(PageRequest pageRequest);
 }

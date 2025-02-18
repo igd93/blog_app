@@ -4,6 +4,8 @@ import com.example.blogapp.entity.Tag;
 import com.example.blogapp.repository.TagRepository;
 import com.example.blogapp.service.TagService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -79,5 +81,10 @@ public class TagServiceImpl implements TagService {
                 .replaceAll("\\s+", "-")
                 .replaceAll("-+", "-")
                 .trim();
+    }
+
+    @Override
+    public Page<Tag> getAllTags(PageRequest pageRequest) {
+        return tagRepository.findAll(pageRequest);
     }
 }
