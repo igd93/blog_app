@@ -10,46 +10,81 @@
     - [x] RegisterPage
     - [x] ProfilePage
     - [x] Header
-  - [ ] Create API Client:
-    - [ ] Set up axios with interceptors
-    - [ ] Create API service classes
-  - [ ] Update Components:
-    - [] Connect LoginPage to backend
-    - [] Connect RegisterPage to backend
-    - [] Connect HomePage to fetch posts
-    - [] Connect BlogDetailPage to fetch post details
-    - [] Connect ProfilePage to user data
-    - [] Setup the backend
 - [x] Setup the DB
   - [x] Setup the schema
 
 ## What needs to be done
 
+- [ ] The frontend
+
+  - [ ] Create API Client:
+    - [ ] Set up axios with interceptors
+    - [ ] Create API service classes
+  - [ ] Update Components:
+    - [ ] Connect LoginPage to backend
+    - [ ] Connect RegisterPage to backend
+    - [ ] Connect HomePage to fetch posts
+    - [ ] Connect BlogDetailPage to fetch post details
+    - [ ] Connect ProfilePage to user data
+
 - [x] The backend
+
+  - [ ] Authentication:
+
+    - [ ] POST /api/auth/register
+    - [ ] POST /api/auth/login
+    - [ ] POST /api/auth/logout
+
+  - [ ] Blog Posts:
+
+    - [ ] GET /api/posts
+    - [ ] GET /api/posts/{id}
+    - [ ] POST /api/posts
+    - [ ] PUT /api/posts/{id}
+    - [ ] DELETE /api/posts/{id}
+
+  - [ ] Users:
+
+    - [ ] GET /api/users/profile
+    - [ ] PUT /api/users/profile
+    - [ ] PUT /api/users/password
+
+  - [ ] Comments:
+
+    - [ ] GET /api/posts/{postId}/comments
+    - [ ] POST /api/posts/{postId}/comments
+    - [ ] PUT /api/comments/{id}
+    - [ ] DELETE /api/comments/{id}
+
+  - [ ] Tags:
+
+    - [ ] GET /api/tags
+    - [ ] POST /api/tags
+
   - [ ] Create REST Controllers:
     - [ ] AuthController (login, register, logout)
     - [ ] BlogController (CRUD operations for posts)
     - [ ] UserController (profile operations)
     - [ ] CommentController
     - [ ] TagController
-  - [ ] Create DTOs:
-    - [ ] UserDTO (for registration and profile)
-    - [ ] BlogPostDTO
-    - [ ] CommentDTO
-    - [ ] TagDTO
-  - [ ] Create Services:
-    - [ ] AuthService
-    - [ ] BlogService
-    - [ ] UserService
-    - [ ] CommentService
-    - [ ] TagService
-- [ ] Setup the authentication
-  - [ ] Spring Security configuration
-  - [ ] JWT token implementation
-- [ ] Setup the authorization
-  - [ ] Role-based authorization
-- [ ] Setup the logging
-- [ ] Setup the testing
-- [ ] Set up the CI/CD pipeline
-- [ ] Set up the deployment
-- [ ] Set up the monitoring
+    - [ ] Create DTOs:
+      - [ ] UserDTO (for registration and profile)
+      - [ ] BlogPostDTO
+      - [ ] CommentDTO
+      - [ ] TagDTO
+    - [ ] Create Services:
+      - [ ] AuthService
+      - [ ] BlogService
+      - [ ] UserService
+      - [ ] CommentService
+      - [ ] TagService
+    - [ ] Setup the authentication
+      - [ ] Spring Security configuration
+      - [ ] JWT token implementation
+    - [ ] Setup the authorization
+      - [ ] Role-based authorization
+  - [ ] Setup the logging
+  - [ ] Setup the testing
+  - [ ] Set up the CI/CD pipeline
+  - [ ] Set up the deployment
+  - [ ] Set up the monitoring
