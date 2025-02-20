@@ -24,23 +24,23 @@
 
 - [ ] The frontend
 
-  - [ ] Create API Client:
-    - [ ] Set up axios with interceptors
-    - [ ] Create API service classes
-  - [ ] Update Components:
-    - [ ] Connect LoginPage to backend
-    - [ ] Connect RegisterPage to backend
-    - [ ] Connect HomePage to fetch posts
-    - [ ] Connect BlogDetailPage to fetch post details
-    - [ ] Connect ProfilePage to user data
+  - [x] Create API Client:
+    - [x] Set up axios with interceptors
+    - [x] Create API service classes
+  - [x] Update Components:
+    - [x] Connect LoginPage to backend
+    - [x] Connect RegisterPage to backend
+    - [x] Connect HomePage to fetch posts
+    - [x] Connect BlogDetailPage to fetch post details
+    - [x] Connect ProfilePage to user data
 
 - [x] The backend
 
-  - [ ] Authentication:
+  - [x] Authentication:
 
-    - [ ] POST /api/auth/register
-    - [ ] POST /api/auth/login
-    - [ ] POST /api/auth/logout
+    - [x] POST /api/auth/register
+    - [x] POST /api/auth/login
+    - [x] POST /api/auth/logout
 
   - [x] Blog Posts:
 
@@ -68,8 +68,8 @@
     - [x] GET /api/tags
     - [x] POST /api/tags
 
-  - [ ] Create REST Controllers:
-    - [ ] AuthController (login, register, logout)
+  - [x] Create REST Controllers:
+    - [x] AuthController (login, register, logout)
     - [x] BlogController (CRUD operations for posts)
     - [x] UserController (profile operations)
     - [x] CommentController
@@ -90,11 +90,11 @@
       - [x] BlogPostRepository
       - [x] CommentRepository
       - [x] TagRepository
-    - [ ] Setup the authentication
-      - [ ] Spring Security configuration
-      - [ ] JWT token implementation
-    - [ ] Setup the authorization
-      - [ ] Role-based authorization
+    - [x] Setup the authentication
+      - [x] Spring Security configuration
+      - [x] JWT token implementation
+    - [x] Setup the authorization
+      - [x] Role-based authorization
   - [ ] Setup the logging
   - [ ] Setup the testing
   - [ ] Set up the CI/CD pipeline

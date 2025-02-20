@@ -1,7 +1,15 @@
 databaseChangeLog:
   - changeSet:
-      id: "004"
-      author: dev
+      id: 004-create-tags
+      author: system
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: tags
+            - tableExists:
+                tableName: post_tags
       changes:
         - createTable:
             tableName: tags
@@ -16,15 +24,14 @@ databaseChangeLog:
                   name: name
                   type: varchar(50)
                   constraints:
-                    nullable: false
                     unique: true
+                    nullable: false
               - column:
                   name: slug
                   type: varchar(50)
                   constraints:
-                    nullable: false
                     unique: true
-
+                    nullable: false
         - createTable:
             tableName: post_tags
             columns:
@@ -33,16 +40,16 @@ databaseChangeLog:
                   type: uuid
                   constraints:
                     nullable: false
-                    foreignKeyName: fk_posttag_post
+                    foreignKeyName: fk_post_tags_post
                     references: blog_posts(id)
               - column:
                   name: tag_id
                   type: uuid
                   constraints:
                     nullable: false
-                    foreignKeyName: fk_posttag_tag
+                    foreignKeyName: fk_post_tags_tag
                     references: tags(id)
-            constraints:
-              - primaryKey:
-                  columnNames: [post_id, tag_id]
-                  constraintName: pk_post_tags
+        - addPrimaryKey:
+            tableName: post_tags
+            columnNames: post_id, tag_id
+            constraintName: pk_post_tags
