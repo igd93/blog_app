@@ -71,7 +71,7 @@
   - [ ] Create REST Controllers:
     - [ ] AuthController (login, register, logout)
     - [x] BlogController (CRUD operations for posts)
-    - [ ] UserController (profile operations)
+    - [x] UserController (profile operations)
     - [x] CommentController
     - [x] TagController
     - [x] Create DTOs:
