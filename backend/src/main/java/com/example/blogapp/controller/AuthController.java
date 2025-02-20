@@ -1,8 +1,8 @@
 package com.example.blogapp.controller;
 
-import com.example.blogapp.dto.AuthResponse;
-import com.example.blogapp.dto.LoginRequest;
-import com.example.blogapp.dto.RegisterRequest;
+import com.example.blogapp.dto.auth.AuthResponse;
+import com.example.blogapp.dto.auth.LoginRequest;
+import com.example.blogapp.dto.auth.RegisterRequest;
 import com.example.blogapp.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

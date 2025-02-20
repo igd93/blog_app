@@ -7,6 +7,7 @@ import com.example.blogapp.entity.User;
 import com.example.blogapp.mapper.UserMapper;
 import com.example.blogapp.service.AuthService;
 import com.example.blogapp.service.UserService;
+import com.example.blogapp.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
