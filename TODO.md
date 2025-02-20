@@ -27,12 +27,12 @@
   - [x] Create API Client:
     - [x] Set up axios with interceptors
     - [x] Create API service classes
-  - [ ] Update Components:
-    - [ ] Connect LoginPage to backend
-    - [ ] Connect RegisterPage to backend
-    - [ ] Connect HomePage to fetch posts
-    - [ ] Connect BlogDetailPage to fetch post details
-    - [ ] Connect ProfilePage to user data
+  - [x] Update Components:
+    - [x] Connect LoginPage to backend
+    - [x] Connect RegisterPage to backend
+    - [x] Connect HomePage to fetch posts
+    - [x] Connect BlogDetailPage to fetch post details
+    - [x] Connect ProfilePage to user data
 
 - [x] The backend
 

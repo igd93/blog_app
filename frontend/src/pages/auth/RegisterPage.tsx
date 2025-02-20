@@ -12,11 +12,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { AuthService } from "@/lib/services/auth.service";
+import { ApiError } from "@/lib/types/api";
+import axios, { AxiosError } from "axios";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
+    username: "",
+    fullName: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -29,13 +34,24 @@ export default function RegisterPage() {
       return;
     }
 
+    setIsLoading(true);
     try {
-      // Add your registration logic here
-      console.log("Registration attempt with:", formData);
-      toast.success("Registration successful!");
+      const { confirmPassword, ...registerData } = formData;
+      await AuthService.register(registerData);
+      toast.success("Registration successful! Please log in.");
       navigate("/login");
     } catch (error) {
-      toast.error("Registration failed. Please try again.");
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError<ApiError>;
+        toast.error(
+          axiosError.response?.data?.message ||
+            "Registration failed. Please try again."
+        );
+      } else {
+        toast.error("An unexpected error occurred");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -53,15 +69,29 @@ export default function RegisterPage() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="username">Username</Label>
               <Input
-                id="name"
-                placeholder="John Doe"
-                value={formData.name}
+                id="username"
+                placeholder="johndoe"
+                value={formData.username}
                 onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
+                  setFormData({ ...formData, username: e.target.value })
                 }
                 required
+                disabled={isLoading}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="fullName">Full Name</Label>
+              <Input
+                id="fullName"
+                placeholder="John Doe"
+                value={formData.fullName}
+                onChange={(e) =>
+                  setFormData({ ...formData, fullName: e.target.value })
+                }
+                required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -75,6 +105,7 @@ export default function RegisterPage() {
                   setFormData({ ...formData, email: e.target.value })
                 }
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -87,6 +118,7 @@ export default function RegisterPage() {
                   setFormData({ ...formData, password: e.target.value })
                 }
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -99,12 +131,13 @@ export default function RegisterPage() {
                   setFormData({ ...formData, confirmPassword: e.target.value })
                 }
                 required
+                disabled={isLoading}
               />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full">
-              Create account
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Creating account..." : "Create account"}
             </Button>
             <div className="text-sm text-center text-muted-foreground">
               Already have an account?{" "}

@@ -12,23 +12,37 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { AuthService } from "@/lib/services/auth.service";
+import { ApiError } from "@/lib/types/api";
+import axios, { AxiosError } from "axios";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: "",
+    usernameOrEmail: "",
     password: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
-      // Add your authentication logic here
-      console.log("Login attempt with:", formData);
+      await AuthService.login(formData);
       toast.success("Successfully logged in!");
       navigate("/profile");
     } catch (error) {
-      toast.error("Login failed. Please try again.");
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError<ApiError>;
+        toast.error(
+          axiosError.response?.data?.message ||
+            "Login failed. Please try again."
+        );
+      } else {
+        toast.error("An unexpected error occurred");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -38,22 +52,23 @@ export default function LoginPage() {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl text-center">Login</CardTitle>
           <CardDescription className="text-center">
-            Enter your email and password to access your account
+            Enter your email/username and password to access your account
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="usernameOrEmail">Email or Username</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="name@example.com"
-                value={formData.email}
+                id="usernameOrEmail"
+                type="text"
+                placeholder="name@example.com or username"
+                value={formData.usernameOrEmail}
                 onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
+                  setFormData({ ...formData, usernameOrEmail: e.target.value })
                 }
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -66,12 +81,13 @@ export default function LoginPage() {
                   setFormData({ ...formData, password: e.target.value })
                 }
                 required
+                disabled={isLoading}
               />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full">
-              Sign in
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Signing in..." : "Sign in"}
             </Button>
             <div className="text-sm text-center text-muted-foreground">
               Don't have an account?{" "}
