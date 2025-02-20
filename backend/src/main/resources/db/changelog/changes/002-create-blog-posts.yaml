@@ -1,7 +1,13 @@
 databaseChangeLog:
   - changeSet:
-      id: "002"
-      author: dev
+      id: 002-create-blog-posts
+      author: system
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: blog_posts
       changes:
         - createTable:
             tableName: blog_posts
@@ -21,20 +27,22 @@ databaseChangeLog:
                   name: slug
                   type: varchar(255)
                   constraints:
-                    nullable: false
                     unique: true
+                    nullable: false
               - column:
                   name: description
-                  type: varchar(500)
+                  type: text
               - column:
                   name: content
-                  type: clob
+                  type: text
+                  constraints:
+                    nullable: false
               - column:
                   name: author_id
                   type: uuid
                   constraints:
                     nullable: false
-                    foreignKeyName: fk_post_author
+                    foreignKeyName: fk_blog_posts_author
                     references: users(id)
               - column:
                   name: status
@@ -44,6 +52,8 @@ databaseChangeLog:
               - column:
                   name: post_date
                   type: timestamp
+                  constraints:
+                    nullable: false
               - column:
                   name: read_time
                   type: varchar(50)
@@ -51,7 +61,11 @@ databaseChangeLog:
                   name: created_at
                   type: timestamp
                   defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
               - column:
                   name: updated_at
                   type: timestamp
                   defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false

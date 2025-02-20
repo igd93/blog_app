@@ -1,7 +1,13 @@
 databaseChangeLog:
   - changeSet:
-      id: "001"
-      author: dev
+      id: 001-create-users
+      author: system
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: users
       changes:
         - createTable:
             tableName: users
@@ -16,14 +22,14 @@ databaseChangeLog:
                   name: username
                   type: varchar(50)
                   constraints:
-                    nullable: false
                     unique: true
+                    nullable: false
               - column:
                   name: email
                   type: varchar(255)
                   constraints:
-                    nullable: false
                     unique: true
+                    nullable: false
               - column:
                   name: password_hash
                   type: varchar(255)
@@ -34,7 +40,7 @@ databaseChangeLog:
                   type: varchar(100)
               - column:
                   name: bio
-                  type: varchar(500)
+                  type: text
               - column:
                   name: avatar_url
                   type: varchar(255)
@@ -42,7 +48,11 @@ databaseChangeLog:
                   name: created_at
                   type: timestamp
                   defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
               - column:
                   name: updated_at
                   type: timestamp
                   defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false

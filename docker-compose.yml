@@ -20,6 +20,9 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/blogdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
       - JWT_SECRET=your_secure_secret_key_here_make_it_at_least_32_chars
       - JWT_EXPIRATION=86400000 # 24 hours in milliseconds
     depends_on:
