@@ -37,17 +37,32 @@ export default function RegisterPage() {
     setIsLoading(true);
     try {
       const { confirmPassword, ...registerData } = formData;
+      console.log("Sending registration data:", registerData);
       await AuthService.register(registerData);
       toast.success("Registration successful! Please log in.");
       navigate("/login");
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const axiosError = error as AxiosError<ApiError>;
-        toast.error(
-          axiosError.response?.data?.message ||
-            "Registration failed. Please try again."
-        );
+        console.error("Registration error details:", {
+          status: axiosError.response?.status,
+          statusText: axiosError.response?.statusText,
+          data: axiosError.response?.data,
+        });
+        if (axiosError.response?.data?.errors) {
+          // Display validation errors
+          const validationErrors = axiosError.response.data.errors;
+          Object.entries(validationErrors).forEach(([field, message]) => {
+            toast.error(`${field}: ${message}`);
+          });
+        } else {
+          toast.error(
+            axiosError.response?.data?.message ||
+              "Registration failed. Please try again."
+          );
+        }
       } else {
+        console.error("Unexpected error:", error);
         toast.error("An unexpected error occurred");
       }
     } finally {

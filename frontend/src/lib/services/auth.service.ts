@@ -9,9 +9,16 @@ export class AuthService {
   }
 
   static async register(data: RegisterRequest): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>("/auth/register", data);
-    localStorage.setItem("token", response.data.token);
-    return response.data;
+    console.log("Register API URL:", api.defaults.baseURL + "/auth/register");
+    console.log("Register request payload:", JSON.stringify(data));
+    try {
+      const response = await api.post<AuthResponse>("/auth/register", data);
+      localStorage.setItem("token", response.data.token);
+      return response.data;
+    } catch (error) {
+      console.error("Register API error:", error);
+      throw error;
+    }
   }
 
   static async logout(): Promise<void> {
