@@ -41,7 +41,7 @@ public class UserController {
     public ResponseEntity<Void> updatePassword(
             @AuthenticationPrincipal User user,
             @Valid @RequestBody PasswordUpdateRequest request) {
-        // TODO: Implement password update logic
+        userService.updatePassword(user, request.getCurrentPassword());
         return ResponseEntity.ok().build();
     }
 }

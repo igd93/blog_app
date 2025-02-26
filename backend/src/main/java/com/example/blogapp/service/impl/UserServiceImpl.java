@@ -1,9 +1,12 @@
 package com.example.blogapp.service.impl;
 
 import com.example.blogapp.entity.User;
+import com.example.blogapp.exception.InvalidPasswordException;
 import com.example.blogapp.repository.UserRepository;
 import com.example.blogapp.service.UserService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +19,7 @@ import java.util.UUID;
 @Transactional
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public User createUser(User user) {
@@ -67,4 +71,20 @@ public class UserServiceImpl implements UserService {
     public boolean existsByUsername(String username) {
         return userRepository.existsByUsername(username);
     }
+
+    @Override
+    @Transactional
+    public void updatePassword(User user, String newPassword) {
+        if (!passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new InvalidPasswordException("Current password is incorrect");
+        }
+
+        // Encode and set the new password
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        user.setPasswordHash(encodedPassword);
+
+        // Save the updated user
+        userRepository.save(user);
+    }
+
 }
