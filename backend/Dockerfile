@@ -1,28 +1,18 @@
-FROM eclipse-temurin:21-jdk-alpine AS build
-WORKDIR /workspace/app
+# ./backend/Dockerfile.dev
+FROM eclipse-temurin:21-jdk-alpine
+WORKDIR /app
 
+# Copy Maven wrapper, configuration, and source
 COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
 COPY src src
 
-RUN ./mvnw install -DskipTests
-RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
+# Ensure the wrapper is executable
+RUN chmod +x mvnw
 
-FROM eclipse-temurin:21-jre-alpine
-VOLUME ["/data"]
-ARG DEPENDENCY=/workspace/app/target/dependency
+# Expose the Spring Boot port
+EXPOSE 8080
 
-# Add a non-root user
-RUN addgroup -S spring && adduser -S spring -G spring
-USER spring:spring
-
-COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
-COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
-COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
-
-# Add healthcheck
-HEALTHCHECK --interval=30s --timeout=3s \
-  CMD wget -q --spider http://localhost:8080/actuator/health || exit 1
-
-ENTRYPOINT ["java","-cp","app:app/lib/*","com.example.blogapp.BlogappApplication"] 
+# Run Spring Boot in development mode (DevTools will monitor for changes)
+CMD ["./mvnw", "spring-boot:run"]
