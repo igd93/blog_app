@@ -68,7 +68,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void logout(String token) {
-        // Implement token blacklisting or invalidation if needed
-        // This depends on your token management strategy
+        // Add token to blacklist to invalidate it
+        jwtService.blacklistToken(token);
     }
 }
