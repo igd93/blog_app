@@ -11,4 +11,4 @@ COPY . .
 EXPOSE 5173
 
 # Run the Vite development server with hot reloading
-CMD ["yarn", "dev"]
+CMD ["yarn", "dev", "--host", "0.0.0.0"]

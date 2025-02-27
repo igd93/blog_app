@@ -14,6 +14,9 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules # Prevent overwriting container node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
 
   backend:
     build:
