@@ -17,31 +17,38 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link, useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
-
-// Temporary auth state - replace with your auth management solution
-const useAuth = () => {
-  return {
-    isAuthenticated: false, // Change to true to test authenticated state
-    user: {
-      name: "John Doe",
-      email: "john@example.com",
-      avatar: "https://github.com/shadcn.png",
-    },
-  };
-};
+import { useAuth } from "@/lib/contexts/AuthContext";
+import { toast } from "sonner";
 
 export default function Header() {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     // Add search logic here
   };
 
-  const handleLogout = () => {
-    // Add logout logic here
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success("Successfully logged out!");
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("There was a problem logging out. Please try again.");
+    }
+  };
+
+  // Get user initials for avatar fallback
+  const getInitials = () => {
+    if (!user?.fullName) return "?";
+    return user.fullName
+      .split(" ")
+      .map((name) => name[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2);
   };
 
   return (
@@ -87,7 +94,7 @@ export default function Header() {
 
           {/* Auth Buttons */}
           <div className="flex items-center gap-4">
-            {isAuthenticated ? (
+            {isAuthenticated && user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -95,19 +102,19 @@ export default function Header() {
                     className="relative h-8 w-8 rounded-full"
                   >
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.avatar} alt={user.name} />
-                      <AvatarFallback>
-                        {user.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </AvatarFallback>
+                      <AvatarImage
+                        src={user.avatarUrl || ""}
+                        alt={user.fullName || user.username}
+                      />
+                      <AvatarFallback>{getInitials()}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuItem className="flex flex-col items-start">
-                    <div className="text-sm font-medium">{user.name}</div>
+                    <div className="text-sm font-medium">
+                      {user.fullName || user.username}
+                    </div>
                     <div className="text-xs text-muted-foreground">
                       {user.email}
                     </div>
@@ -126,6 +133,7 @@ export default function Header() {
                 <Button variant="ghost" onClick={() => navigate("/login")}>
                   Log in
                 </Button>
+                <Button onClick={() => navigate("/register")}>Sign up</Button>
               </>
             )}
           </div>
