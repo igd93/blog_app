@@ -15,16 +15,18 @@ import { toast } from "sonner";
 import { AuthService } from "@/lib/services/auth.service";
 import { ApiError } from "@/lib/types/api";
 import axios, { AxiosError } from "axios";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     username: "",
-    fullName: "",
     email: "",
     password: "",
     confirmPassword: "",
+    fullName: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,11 +38,24 @@ export default function RegisterPage() {
 
     setIsLoading(true);
     try {
-      const { confirmPassword, ...registerData } = formData;
+      // Destructure only the fields we need for registration
+      const registerData = {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        fullName: formData.fullName,
+      };
+
       console.log("Sending registration data:", registerData);
-      await AuthService.register(registerData);
-      toast.success("Registration successful! Please log in.");
-      navigate("/login");
+
+      // Register the user and get the response
+      const authResponse = await AuthService.register(registerData);
+
+      // Set the user data and token in the context
+      login(authResponse.token, authResponse.user);
+
+      toast.success("Registration successful! Welcome!");
+      navigate("/profile");
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const axiosError = error as AxiosError<ApiError>;

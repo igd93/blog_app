@@ -12,6 +12,9 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 @Service
@@ -21,6 +24,9 @@ public class JwtService {
 
     @Value("${jwt.expiration}")
     private long jwtExpiration;
+
+    // Simple token blacklist to store invalidated tokens
+    private final Set<String> blacklistedTokens = ConcurrentHashMap.newKeySet();
 
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
@@ -36,7 +42,19 @@ public class JwtService {
 
     public boolean isTokenValid(String token, User user) {
         final String username = extractUsername(token);
-        return (username.equals(user.getUsername())) && !isTokenExpired(token);
+        return (username.equals(user.getUsername())) && !isTokenExpired(token) && !isTokenBlacklisted(token);
+    }
+
+    public void blacklistToken(String token) {
+        // Remove "Bearer " prefix if present
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+        blacklistedTokens.add(token);
+    }
+
+    public boolean isTokenBlacklisted(String token) {
+        return blacklistedTokens.contains(token);
     }
 
     private String createToken(Map<String, Object> claims, String subject) {

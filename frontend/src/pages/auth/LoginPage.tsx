@@ -15,9 +15,11 @@ import { toast } from "sonner";
 import { AuthService } from "@/lib/services/auth.service";
 import { ApiError } from "@/lib/types/api";
 import axios, { AxiosError } from "axios";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { login, refreshUserData } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     usernameOrEmail: "",
@@ -28,7 +30,15 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await AuthService.login(formData);
+      // Get the response which contains token and user data
+      const authResponse = await AuthService.login(formData);
+
+      // Set the user data and token in the context
+      login(authResponse.token, authResponse.user);
+
+      // Additionally, refresh user data to ensure we have the most up-to-date data
+      await refreshUserData();
+
       toast.success("Successfully logged in!");
       navigate("/profile");
     } catch (error) {

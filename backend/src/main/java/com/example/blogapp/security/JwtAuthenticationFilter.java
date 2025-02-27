@@ -38,6 +38,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         jwt = authHeader.substring(7);
+
+        // Check if token is blacklisted
+        if (jwtService.isTokenBlacklisted(jwt)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         username = jwtService.extractUsername(jwt);
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

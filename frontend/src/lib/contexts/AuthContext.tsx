@@ -43,9 +43,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const userDetails = await AuthService.getCurrentUser();
       console.log("Refreshed user data:", userDetails);
       setUser(userDetails);
+      setIsAuthenticated(true);
       return userDetails;
     } catch (error) {
       console.error("Failed to refresh user details:", error);
+      setIsAuthenticated(false);
+      setUser(null);
       return null;
     }
   }, []);
@@ -72,7 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         } catch (error) {
           console.error("Failed to get user details on initial load:", error);
           // If fetching user fails, clear token
-          AuthService.logout();
+          localStorage.removeItem("token");
           setUser(null);
           setIsAuthenticated(false);
         }

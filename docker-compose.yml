@@ -6,11 +6,18 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "5173:80"
+      - "5173:5173"
     depends_on:
       - backend
     networks:
       - blog-network
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # Prevent overwriting container node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - VITE_API_BASE_URL=http://localhost:8080/api
 
   backend:
     build:
@@ -23,11 +30,12 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/blogdb
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
-      - JWT_SECRET=your_secure_secret_key_here_make_it_at_least_32_chars
-      - JWT_EXPIRATION=86400000 # 24 hours in milliseconds
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION=${JWT_EXPIRATION}
     depends_on:
       - postgres
     volumes:
+      - ./backend:/app
       - ./data:/data
     networks:
       - blog-network
