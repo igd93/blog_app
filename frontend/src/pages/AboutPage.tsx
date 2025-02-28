@@ -63,16 +63,43 @@ export default function AboutPage() {
             <p>This blog platform is built with a modern tech stack:</p>
             <ul>
               <li>
-                <strong>Frontend:</strong> React, TypeScript, Tailwind CSS
+                <strong>Frontend:</strong>{" "}
+                <span className="inline-flex items-center gap-1">
+                  React{" "}
+                  <img
+                    src="https://cdn.simpleicons.org/react"
+                    alt="React"
+                    className="w-4 h-4"
+                  />
+                  , Tailwind CSS{" "}
+                  <img
+                    src="https://cdn.simpleicons.org/tailwindcss"
+                    alt="Tailwind CSS"
+                    className="w-4 h-4"
+                  />
+                </span>
               </li>
               <li>
-                <strong>Backend:</strong> Spring Boot, Java
+                <strong>Backend:</strong>{" "}
+                <span className="inline-flex items-center gap-1">
+                  Spring Boot{" "}
+                  <img
+                    src="https://cdn.simpleicons.org/springboot"
+                    alt="Spring Boot"
+                    className="w-4 h-4"
+                  />
+                </span>
               </li>
               <li>
-                <strong>Database:</strong> PostgreSQL
-              </li>
-              <li>
-                <strong>Authentication:</strong> JWT
+                <strong>Database:</strong>{" "}
+                <span className="inline-flex items-center gap-1">
+                  PostgreSQL{" "}
+                  <img
+                    src="https://cdn.simpleicons.org/postgresql"
+                    alt="PostgreSQL"
+                    className="w-4 h-4"
+                  />
+                </span>
               </li>
             </ul>
             <p>
