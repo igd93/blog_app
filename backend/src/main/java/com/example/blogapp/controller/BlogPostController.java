@@ -29,7 +29,21 @@ public class BlogPostController {
             @RequestParam(defaultValue = "postDate") String sortBy,
             @RequestParam(defaultValue = "desc") String direction) {
 
-        Sort.Direction sortDirection = Sort.Direction.fromString(direction.toUpperCase());
+        if (page < 0) {
+            throw new IllegalArgumentException("Page index must not be less than zero");
+        }
+        if (size < 1) {
+            throw new IllegalArgumentException("Page size must not be less than one");
+        }
+
+        Sort.Direction sortDirection;
+        try {
+            sortDirection = Sort.Direction.fromString(direction.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid value '" + direction
+                    + "' for orders given; Has to be either 'desc' or 'asc' (case insensitive)");
+        }
+
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
 
         Page<BlogPostDTO> posts = blogPostService.getAllPosts(pageRequest)
