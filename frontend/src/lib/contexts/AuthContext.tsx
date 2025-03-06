@@ -18,10 +18,11 @@ interface AuthContextType {
   refreshUserData: () => Promise<User | null>;
 }
 
+// Default context value
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   user: null,
-  loading: true,
+  loading: true, // Default loading state is true
   login: () => {},
   logout: () => {},
   refreshUserData: async () => null,
@@ -34,7 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Initialize loading to true
 
   // Function to fetch user data - can be called whenever we need fresh data
   const refreshUserData = useCallback(async (): Promise<User | null> => {
@@ -55,40 +56,60 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // On mount, check if user is authenticated
   useEffect(() => {
+    let isMounted = true; // Flag to prevent state updates after unmount
+
     const checkAuth = async () => {
       console.log("Checking authentication status...");
-      setLoading(true);
+      // Loading is already set to true by default, no need to set it again
 
-      const hasToken = AuthService.isAuthenticated();
-      console.log("Token exists:", hasToken);
+      try {
+        const hasToken = AuthService.isAuthenticated();
+        console.log("Token exists:", hasToken);
 
-      if (hasToken) {
-        try {
-          // Try to get user profile
-          const userDetails = await AuthService.getCurrentUser();
-          console.log(
-            "User details loaded on initial auth check:",
-            userDetails
-          );
-          setUser(userDetails);
-          setIsAuthenticated(true);
-        } catch (error) {
-          console.error("Failed to get user details on initial load:", error);
-          // If fetching user fails, clear token
-          localStorage.removeItem("token");
-          setUser(null);
-          setIsAuthenticated(false);
+        if (hasToken) {
+          try {
+            // Try to get user profile
+            const userDetails = await AuthService.getCurrentUser();
+            console.log(
+              "User details loaded on initial auth check:",
+              userDetails
+            );
+
+            if (isMounted) {
+              setUser(userDetails);
+              setIsAuthenticated(true);
+            }
+          } catch (error) {
+            console.error("Failed to get user details on initial load:", error);
+            // If fetching user fails, clear token
+            localStorage.removeItem("token");
+
+            if (isMounted) {
+              setUser(null);
+              setIsAuthenticated(false);
+            }
+          }
+        } else {
+          // No token found
+          if (isMounted) {
+            setUser(null);
+            setIsAuthenticated(false);
+          }
         }
-      } else {
-        // No token found
-        setUser(null);
-        setIsAuthenticated(false);
+      } finally {
+        // Always set loading to false when done, if component is still mounted
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-
-      setLoading(false);
     };
 
     checkAuth();
+
+    // Cleanup function to prevent state updates after unmount
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const login = useCallback((token: string, userData: User) => {

@@ -172,6 +172,7 @@ export default function ProfilePage() {
                   <Label htmlFor="currentPassword">Current Password</Label>
                   <Input
                     id="currentPassword"
+                    data-testid="currentPassword"
                     type="password"
                     value={profile.currentPassword}
                     onChange={(e) =>
@@ -186,6 +187,7 @@ export default function ProfilePage() {
                   <Label htmlFor="newPassword">New Password</Label>
                   <Input
                     id="newPassword"
+                    data-testid="newPassword"
                     type="password"
                     value={profile.newPassword}
                     onChange={(e) =>
@@ -197,6 +199,7 @@ export default function ProfilePage() {
                   <Label htmlFor="confirmPassword">Confirm New Password</Label>
                   <Input
                     id="confirmPassword"
+                    data-testid="confirmPassword"
                     type="password"
                     value={profile.confirmPassword}
                     onChange={(e) =>
