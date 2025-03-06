@@ -57,7 +57,10 @@ export default function HomePage() {
       <div className="container mx-auto py-8">
         <h1 className="text-4xl font-bold mb-8">Blog Posts</h1>
         <div className="flex justify-center items-center h-[400px]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div
+            data-testid="loading-spinner"
+            className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"
+          ></div>
         </div>
       </div>
     );
@@ -72,6 +75,7 @@ export default function HomePage() {
           {posts.map((post) => (
             <Card
               key={post.id}
+              data-testid={`post-card-${post.id}`}
               className="cursor-pointer hover:bg-accent"
               onClick={() => navigate(`/blog/${post.id}`)}
             >
