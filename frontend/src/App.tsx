@@ -10,6 +10,7 @@ import Header from "./components/Header";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./lib/contexts/AuthContext";
 import { Toaster } from "sonner";
+import MyPublicationsPage from "./pages/MyPublicationsPage";
 
 function App() {
   return (
@@ -28,6 +29,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/my-publications"
+                element={
+                  <ProtectedRoute>
+                    <MyPublicationsPage />
                   </ProtectedRoute>
                 }
               />
