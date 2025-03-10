@@ -3,8 +3,10 @@ package com.example.blogapp.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -12,6 +14,8 @@ import java.util.UUID;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class BlogPostDTO {
     private UUID id;
 
@@ -33,6 +37,8 @@ public class BlogPostDTO {
     private LocalDateTime postDate;
 
     private String readTime;
+
+    private String imageUrl;
 
     private Set<TagDTO> tags;
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { BlogService } from "@/lib/services/blog.service";
+import { FileService } from "@/lib/services/file.service";
 import { BlogPost } from "@/lib/types/api";
 import { Button } from "@/components/ui/button";
 import {
@@ -51,6 +52,7 @@ export default function MyPublicationsPage() {
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
 
   // Fetch user's publications
   useEffect(() => {
@@ -59,13 +61,26 @@ export default function MyPublicationsPage() {
 
       setLoading(true);
       try {
-        // Assuming the backend provides an endpoint to get posts by author
-        // If not, we'll need to filter the posts on the frontend
-        const response = await BlogService.getPosts();
-        const userPosts = response.content.filter(
-          (post) => post.author.id === user.id
-        );
+        // Use the new method to get posts by author
+        const userPosts = await BlogService.getPostsByAuthor(user.id);
         setPublications(userPosts);
+
+        // Get presigned URLs for all post images
+        const urls: Record<string, string> = {};
+        for (const post of userPosts) {
+          if (post.imageUrl) {
+            try {
+              const url = await FileService.getPostImageUrl(post.id);
+              urls[post.id] = url;
+            } catch (error) {
+              console.error(
+                `Failed to get presigned URL for post ${post.id}:`,
+                error
+              );
+            }
+          }
+        }
+        setImageUrls(urls);
       } catch (error) {
         console.error("Failed to fetch publications:", error);
         toast.error("Failed to load your publications. Please try again.");
@@ -150,23 +165,49 @@ export default function MyPublicationsPage() {
         return;
       }
 
+      if (!user) {
+        toast.error("You must be logged in to create a publication.");
+        return;
+      }
+
       // Create post object
       const newPost: Partial<BlogPost> = {
         title: formData.title,
         description: formData.description,
         content: formData.content,
         status: formData.status,
+        author: user,
       };
 
       // Submit to API
-      const createdPost = await BlogService.createPost(newPost);
+      let createdPost = await BlogService.createPost(newPost);
 
       // Handle image upload if selected
-      // Note: This would require additional backend support for file uploads
       if (selectedImage) {
-        // Implement image upload logic here
-        // For example: await uploadPostImage(createdPost.id, selectedImage);
-        console.log("Image upload would happen here");
+        try {
+          const imageUrl = await FileService.uploadPostImage(
+            createdPost.id,
+            selectedImage
+          );
+          console.log("Image uploaded successfully:", imageUrl);
+
+          // Refresh the post data to get the updated imageUrl
+          createdPost = await BlogService.getPost(createdPost.id);
+
+          // Get a presigned URL for the image
+          if (createdPost.imageUrl) {
+            const presignedUrl = await FileService.getPostImageUrl(
+              createdPost.id
+            );
+            setImageUrls((prev) => ({
+              ...prev,
+              [createdPost.id]: presignedUrl,
+            }));
+          }
+        } catch (uploadError) {
+          console.error("Failed to upload image:", uploadError);
+          toast.error("Publication created but failed to upload image.");
+        }
       }
 
       // Update local state
@@ -200,15 +241,37 @@ export default function MyPublicationsPage() {
         description: formData.description,
         content: formData.content,
         status: formData.status,
+        // Preserve the original author
+        author: selectedPost.author,
       };
 
       // Submit to API
-      const result = await BlogService.updatePost(selectedPost.id, updatedPost);
+      let result = await BlogService.updatePost(selectedPost.id, updatedPost);
 
       // Handle image upload if selected
       if (selectedImage) {
-        // Implement image upload logic here
-        console.log("Image upload would happen here");
+        try {
+          const imageUrl = await FileService.uploadPostImage(
+            result.id,
+            selectedImage
+          );
+          console.log("Image uploaded successfully:", imageUrl);
+
+          // Refresh the post data to get the updated imageUrl
+          result = await BlogService.getPost(result.id);
+
+          // Get a presigned URL for the image
+          if (result.imageUrl) {
+            const presignedUrl = await FileService.getPostImageUrl(result.id);
+            setImageUrls((prev) => ({
+              ...prev,
+              [result.id]: presignedUrl,
+            }));
+          }
+        } catch (uploadError) {
+          console.error("Failed to upload image:", uploadError);
+          toast.error("Publication updated but failed to upload image.");
+        }
       }
 
       // Update local state
@@ -259,6 +322,11 @@ export default function MyPublicationsPage() {
       month: "long",
       day: "numeric",
     });
+  };
+
+  // Get the image URL for a post (either presigned or direct)
+  const getPostImageUrl = (post: BlogPost) => {
+    return imageUrls[post.id] || post.imageUrl;
   };
 
   if (!user) {
@@ -424,6 +492,15 @@ export default function MyPublicationsPage() {
                 </div>
               </CardHeader>
               <CardContent>
+                {post.imageUrl && (
+                  <div className="mb-4">
+                    <img
+                      src={getPostImageUrl(post)}
+                      alt={post.title}
+                      className="w-full h-48 object-cover rounded-md"
+                    />
+                  </div>
+                )}
                 <p className="line-clamp-2 text-muted-foreground">
                   {post.description || post.content.substring(0, 150)}
                 </p>
