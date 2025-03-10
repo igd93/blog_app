@@ -19,6 +19,11 @@ export class BlogService {
     return response.data;
   }
 
+  static async getPostsByAuthor(authorId: string): Promise<BlogPost[]> {
+    const response = await api.get<BlogPost[]>(`/posts/author/${authorId}`);
+    return response.data;
+  }
+
   static async createPost(post: Partial<BlogPost>): Promise<BlogPost> {
     const response = await api.post<BlogPost>("/posts", post);
     return response.data;

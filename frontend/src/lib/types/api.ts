@@ -16,6 +16,7 @@ export interface BlogPost {
   status: string;
   postDate: string;
   readTime: string;
+  imageUrl?: string;
   author: User;
   tags: Tag[];
 }

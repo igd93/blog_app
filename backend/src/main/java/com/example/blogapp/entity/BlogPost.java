@@ -45,6 +45,9 @@ public class BlogPost extends BaseEntity {
     @Column(name = "read_time")
     private String readTime;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @ManyToMany
     @JoinTable(name = "post_tags", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private Set<Tag> tags = new HashSet<>();

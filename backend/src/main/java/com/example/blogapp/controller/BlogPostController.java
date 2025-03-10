@@ -2,25 +2,36 @@ package com.example.blogapp.controller;
 
 import com.example.blogapp.dto.BlogPostDTO;
 import com.example.blogapp.entity.BlogPost;
+import com.example.blogapp.entity.User;
 import com.example.blogapp.mapper.BlogPostMapper;
 import com.example.blogapp.service.BlogPostService;
+import com.example.blogapp.service.FileStorageService;
+import com.example.blogapp.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
 public class BlogPostController {
     private final BlogPostService blogPostService;
+    private final UserService userService;
     private final BlogPostMapper blogPostMapper;
+    private final FileStorageService fileStorageService;
 
     @GetMapping
     public ResponseEntity<Page<BlogPostDTO>> getAllPosts(
@@ -90,5 +101,80 @@ public class BlogPostController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/author/{authorId}")
+    public ResponseEntity<List<BlogPostDTO>> getPostsByAuthor(@PathVariable UUID authorId) {
+        return userService.getUserById(authorId)
+                .map(author -> {
+                    List<BlogPost> posts = blogPostService.getPostsByAuthor(author);
+                    List<BlogPostDTO> postDTOs = posts.stream()
+                            .map(blogPostMapper::toDTO)
+                            .collect(Collectors.toList());
+                    return ResponseEntity.ok(postDTOs);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, String>> uploadPostImage(
+            @PathVariable UUID id,
+            @RequestParam("file") MultipartFile file) {
+
+        return blogPostService.getPostById(id)
+                .map(post -> {
+                    try {
+                        // Store the file in MinIO under the posts/{id} path
+                        String imageUrl = fileStorageService.storeFile(file, "posts/" + id);
+
+                        // Update the post with the image URL
+                        post.setImageUrl(imageUrl);
+                        blogPostService.updatePost(post);
+
+                        Map<String, String> response = new HashMap<>();
+                        response.put("imageUrl", imageUrl);
+
+                        return ResponseEntity.ok(response);
+                    } catch (Exception e) {
+                        Map<String, String> errorResponse = new HashMap<>();
+                        errorResponse.put("error", e.getMessage());
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+                    }
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{id}/image/url")
+    public ResponseEntity<Map<String, String>> getPostImageUrl(
+            @PathVariable UUID id,
+            @RequestParam(defaultValue = "60") int expiryMinutes) {
+
+        return blogPostService.getPostById(id)
+                .map(post -> {
+                    try {
+                        if (post.getImageUrl() == null || post.getImageUrl().isEmpty()) {
+                            Map<String, String> notFoundResponse = new HashMap<>();
+                            notFoundResponse.put("error", "Image not found");
+                            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(notFoundResponse);
+                        }
+
+                        // Get a presigned URL for the image
+                        String presignedUrl = fileStorageService.getPresignedUrl(post.getImageUrl(), expiryMinutes);
+
+                        Map<String, String> response = new HashMap<>();
+                        response.put("imageUrl", presignedUrl);
+
+                        return ResponseEntity.ok(response);
+                    } catch (Exception e) {
+                        Map<String, String> errorResponse = new HashMap<>();
+                        errorResponse.put("error", e.getMessage());
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+                    }
+                })
+                .orElseGet(() -> {
+                    Map<String, String> notFoundResponse = new HashMap<>();
+                    notFoundResponse.put("error", "Post not found");
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(notFoundResponse);
+                });
     }
 }
