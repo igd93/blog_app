@@ -348,14 +348,14 @@ export default function MyPublicationsPage() {
               Create New
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px]">
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Create New Publication</DialogTitle>
               <DialogDescription>
                 Create a new blog post to share with your readers.
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
+            <div className="grid gap-4 py-2">
               <div className="grid gap-2">
                 <Label htmlFor="title">Title</Label>
                 <Input
@@ -384,7 +384,7 @@ export default function MyPublicationsPage() {
                   value={formData.content}
                   onChange={handleInputChange}
                   placeholder="Write your post content here..."
-                  className="min-h-[200px]"
+                  className="min-h-[150px] max-h-[200px]"
                 />
               </div>
               <div className="grid gap-2">
@@ -404,7 +404,7 @@ export default function MyPublicationsPage() {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="image">Featured Image (optional)</Label>
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center gap-4">
                   <Button
                     type="button"
                     variant="outline"
@@ -433,14 +433,17 @@ export default function MyPublicationsPage() {
                 </div>
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="mt-2 sm:mt-4 flex-col sm:flex-row gap-2">
               <Button
                 variant="outline"
                 onClick={() => setOpenCreateDialog(false)}
+                className="w-full sm:w-auto"
               >
                 Cancel
               </Button>
-              <Button onClick={handleCreatePost}>Create</Button>
+              <Button onClick={handleCreatePost} className="w-full sm:w-auto">
+                Create
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -532,14 +535,14 @@ export default function MyPublicationsPage() {
 
       {/* Edit Dialog */}
       <Dialog open={openEditDialog} onOpenChange={setOpenEditDialog}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Publication</DialogTitle>
             <DialogDescription>
               Make changes to your publication.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-4 py-2">
             <div className="grid gap-2">
               <Label htmlFor="edit-title">Title</Label>
               <Input
@@ -565,7 +568,7 @@ export default function MyPublicationsPage() {
                 name="content"
                 value={formData.content}
                 onChange={handleInputChange}
-                className="min-h-[200px]"
+                className="min-h-[150px] max-h-[200px]"
               />
             </div>
             <div className="grid gap-2">
@@ -585,7 +588,7 @@ export default function MyPublicationsPage() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="edit-image">Featured Image (optional)</Label>
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-4">
                 <Button
                   type="button"
                   variant="outline"
@@ -614,11 +617,17 @@ export default function MyPublicationsPage() {
               </div>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenEditDialog(false)}>
+          <DialogFooter className="mt-2 sm:mt-4 flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setOpenEditDialog(false)}
+              className="w-full sm:w-auto"
+            >
               Cancel
             </Button>
-            <Button onClick={handleUpdatePost}>Save Changes</Button>
+            <Button onClick={handleUpdatePost} className="w-full sm:w-auto">
+              Save Changes
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -633,14 +642,19 @@ export default function MyPublicationsPage() {
               cannot be undone.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="mt-4">
+          <DialogFooter className="mt-4 flex-col sm:flex-row gap-2">
             <Button
               variant="outline"
               onClick={() => setOpenDeleteDialog(false)}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDeletePost}>
+            <Button
+              variant="destructive"
+              onClick={handleDeletePost}
+              className="w-full sm:w-auto"
+            >
               Delete
             </Button>
           </DialogFooter>
