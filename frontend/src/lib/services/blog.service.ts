@@ -33,8 +33,15 @@ export class BlogService {
     id: string,
     post: Partial<BlogPost>
   ): Promise<BlogPost> {
-    const response = await api.put<BlogPost>(`/posts/${id}`, post);
-    return response.data;
+    console.log("BlogService.updatePost - Request:", { id, post });
+    try {
+      const response = await api.put<BlogPost>(`/posts/${id}`, post);
+      console.log("BlogService.updatePost - Response:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("BlogService.updatePost - Error:", error);
+      throw error;
+    }
   }
 
   static async deletePost(id: string): Promise<void> {

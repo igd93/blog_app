@@ -136,6 +136,7 @@ export default function MyPublicationsPage() {
     });
     setSelectedImage(null);
     setImagePreview(null);
+    setSelectedPost(null);
   };
 
   // Open edit dialog with post data
@@ -147,6 +148,9 @@ export default function MyPublicationsPage() {
       content: post.content,
       status: post.status,
     });
+    // Reset image states when opening edit dialog
+    setSelectedImage(null);
+    setImagePreview(null);
     setOpenEditDialog(true);
   };
 
@@ -226,7 +230,11 @@ export default function MyPublicationsPage() {
 
   // Update existing post
   const handleUpdatePost = async () => {
-    if (!selectedPost) return;
+    if (!selectedPost) {
+      console.error("No post selected for update");
+      toast.error("No post selected for update");
+      return;
+    }
 
     try {
       // Validate form data
@@ -235,22 +243,36 @@ export default function MyPublicationsPage() {
         return;
       }
 
+      console.log("handleUpdatePost - Selected Post:", selectedPost);
+      console.log("handleUpdatePost - Form Data:", formData);
+
       // Create update object
       const updatedPost: Partial<BlogPost> = {
+        id: selectedPost.id,
         title: formData.title,
         description: formData.description,
         content: formData.content,
         status: formData.status,
         // Preserve the original author
         author: selectedPost.author,
+        // Preserve other fields
+        slug: selectedPost.slug,
+        postDate: selectedPost.postDate,
+        readTime: selectedPost.readTime,
+        imageUrl: selectedPost.imageUrl,
+        tags: selectedPost.tags,
       };
+
+      console.log("handleUpdatePost - Update Object:", updatedPost);
 
       // Submit to API
       let result = await BlogService.updatePost(selectedPost.id, updatedPost);
+      console.log("handleUpdatePost - API Response:", result);
 
       // Handle image upload if selected
       if (selectedImage) {
         try {
+          console.log("Uploading image for post:", result.id);
           const imageUrl = await FileService.uploadPostImage(
             result.id,
             selectedImage
@@ -272,6 +294,20 @@ export default function MyPublicationsPage() {
           console.error("Failed to upload image:", uploadError);
           toast.error("Publication updated but failed to upload image.");
         }
+      } else if (result.imageUrl) {
+        // If no new image was selected but the post has an image, update the URL in our cache
+        try {
+          const presignedUrl = await FileService.getPostImageUrl(result.id);
+          setImageUrls((prev) => ({
+            ...prev,
+            [result.id]: presignedUrl,
+          }));
+        } catch (error) {
+          console.error(
+            "Failed to get presigned URL for existing image:",
+            error
+          );
+        }
       }
 
       // Update local state
@@ -288,6 +324,9 @@ export default function MyPublicationsPage() {
       toast.success("Publication updated successfully!");
     } catch (error) {
       console.error("Failed to update publication:", error);
+      if (error instanceof Error) {
+        console.error("Error details:", error.message);
+      }
       toast.error("Failed to update publication. Please try again.");
     }
   };
@@ -605,7 +644,7 @@ export default function MyPublicationsPage() {
                   onChange={handleImageChange}
                   className="hidden"
                 />
-                {imagePreview && (
+                {imagePreview ? (
                   <div className="relative w-16 h-16">
                     <img
                       src={imagePreview}
@@ -613,6 +652,17 @@ export default function MyPublicationsPage() {
                       className="w-full h-full object-cover rounded"
                     />
                   </div>
+                ) : (
+                  selectedPost?.imageUrl && (
+                    <div className="relative w-16 h-16">
+                      <img
+                        src={getPostImageUrl(selectedPost)}
+                        alt="Current image"
+                        className="w-full h-full object-cover rounded"
+                      />
+                      <div className="text-xs mt-1">Current image</div>
+                    </div>
+                  )
                 )}
               </div>
             </div>
