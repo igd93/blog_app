@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.Locale;
 import java.util.regex.Pattern;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -28,11 +29,24 @@ public class BlogPostServiceImpl implements BlogPostService {
         if (post.getSlug() == null || post.getSlug().isEmpty()) {
             post.setSlug(generateSlug(post.getTitle()));
         }
+        if (post.getPostDate() == null) {
+            post.setPostDate(LocalDateTime.now());
+        }
+        if (post.getReadTime() == null || post.getReadTime().isEmpty()) {
+            post.setReadTime(calculateReadTime(post.getContent()));
+        }
         return blogPostRepository.save(post);
     }
 
     @Override
     public BlogPost updatePost(BlogPost post) {
+        // Ensure postDate is never null during updates
+        if (post.getPostDate() == null) {
+            post.setPostDate(LocalDateTime.now());
+        }
+        if (post.getReadTime() == null || post.getReadTime().isEmpty()) {
+            post.setReadTime(calculateReadTime(post.getContent()));
+        }
         return blogPostRepository.save(post);
     }
 
@@ -97,6 +111,28 @@ public class BlogPostServiceImpl implements BlogPostService {
         }
 
         return slug;
+    }
+
+    /**
+     * Calculate estimated reading time based on content length.
+     * Average reading speed is about 200-250 words per minute.
+     * 
+     * @param content The post content
+     * @return Formatted read time string (e.g., "3 min")
+     */
+    private String calculateReadTime(String content) {
+        if (content == null || content.isEmpty()) {
+            return "1 min";
+        }
+
+        // Count words (roughly by splitting on whitespace)
+        String[] words = content.split("\\s+");
+        int wordCount = words.length;
+
+        // Calculate minutes based on average reading speed of 200 words per minute
+        int minutes = Math.max(1, (int) Math.ceil(wordCount / 200.0));
+
+        return minutes + " min";
     }
 
 }
