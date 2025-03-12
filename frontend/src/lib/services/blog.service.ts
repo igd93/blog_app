@@ -24,6 +24,22 @@ export class BlogService {
     return response.data;
   }
 
+  static async searchPosts(
+    query: string,
+    page = 0,
+    size = 10,
+    sortBy = "postDate",
+    direction = "desc"
+  ): Promise<PaginatedResponse<BlogPost>> {
+    const response = await api.get<PaginatedResponse<BlogPost>>(
+      "/posts/search",
+      {
+        params: { query, page, size, sortBy, direction },
+      }
+    );
+    return response.data;
+  }
+
   static async createPost(post: Partial<BlogPost>): Promise<BlogPost> {
     const response = await api.post<BlogPost>("/posts", post);
     return response.data;

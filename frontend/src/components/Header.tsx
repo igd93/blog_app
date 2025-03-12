@@ -19,14 +19,18 @@ import { Link, useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { toast } from "sonner";
+import { useState } from "react";
 
 export default function Header() {
   const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuth();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Add search logic here
+    if (searchQuery.trim()) {
+      navigate(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
+    }
   };
 
   const handleLogout = async () => {
@@ -88,7 +92,12 @@ export default function Header() {
           <form onSubmit={handleSearch} className="flex-1 max-w-md mx-4">
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search posts..." className="pl-8" />
+              <Input
+                placeholder="Search posts..."
+                className="pl-8"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
           </form>
 

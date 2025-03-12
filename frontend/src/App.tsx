@@ -6,6 +6,7 @@ import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import ProfilePage from "./pages/ProfilePage";
 import AboutPage from "./pages/AboutPage";
+import SearchResultsPage from "./pages/SearchResultsPage";
 import Header from "./components/Header";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./lib/contexts/AuthContext";
@@ -22,6 +23,7 @@ function App() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/blog/:id" element={<BlogDetailPage />} />
+              <Route path="/search" element={<SearchResultsPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route

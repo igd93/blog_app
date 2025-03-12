@@ -92,6 +92,12 @@ public class BlogPostServiceImpl implements BlogPostService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Page<BlogPost> searchPosts(String query, Pageable pageable) {
+        return blogPostRepository.searchPosts(query, pageable);
+    }
+
+    @Override
     public String generateSlug(String title) {
         String normalized = Normalizer.normalize(title, Normalizer.Form.NFD);
         Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");

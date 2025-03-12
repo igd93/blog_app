@@ -28,4 +28,6 @@ public interface BlogPostService {
     String generateSlug(String title);
 
     Page<BlogPost> getAllPosts(Pageable pageable);
+
+    Page<BlogPost> searchPosts(String query, Pageable pageable);
 }
