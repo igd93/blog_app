@@ -17,9 +17,10 @@ import { toast } from "sonner";
 import { BlogService } from "@/lib/services/blog.service";
 import { CommentService } from "@/lib/services/comment.service";
 import { AuthService } from "@/lib/services/auth.service";
-import { BlogPost, Comment } from "@/lib/types/api";
+import { BlogPost, Comment, User } from "@/lib/types/api";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import axios from "axios";
 
 export default function BlogDetailPage() {
   const { id } = useParams();
@@ -32,6 +33,7 @@ export default function BlogDetailPage() {
   const [newComment, setNewComment] = useState("");
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const isAuthenticated = AuthService.isAuthenticated();
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   // Fetch blog post and comments
   useEffect(() => {
@@ -70,6 +72,23 @@ export default function BlogDetailPage() {
     window.addEventListener("scroll", calculateReadingProgress);
     return () => window.removeEventListener("scroll", calculateReadingProgress);
   }, []);
+
+  // Fetch current user if authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      AuthService.getCurrentUser()
+        .then((user) => {
+          console.log("Current user fetched:", user);
+          setCurrentUser(user);
+
+          // Test authentication with backend
+          CommentService.testAuth()
+            .then((result) => console.log("Auth test result:", result))
+            .catch((err) => console.error("Auth test failed:", err));
+        })
+        .catch((err) => console.error("Failed to fetch current user:", err));
+    }
+  }, [isAuthenticated]);
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,13 +129,58 @@ export default function BlogDetailPage() {
 
     setIsSubmittingComment(true);
     try {
+      // Check authentication status
+      if (!isAuthenticated) {
+        toast.error("You must be logged in to comment");
+        navigate("/login");
+        return;
+      }
+
+      // Make sure we have the current user
+      if (!currentUser) {
+        try {
+          console.log("Fetching current user before submitting comment");
+          const user = await AuthService.getCurrentUser();
+          console.log("Current user fetched successfully:", user);
+          setCurrentUser(user);
+        } catch (err) {
+          console.error("Failed to get current user:", err);
+          toast.error("Please log in again to comment");
+          // Force re-authentication
+          AuthService.logout().then(() => navigate("/login"));
+          setIsSubmittingComment(false);
+          return;
+        }
+      }
+
+      console.log("Submitting comment with content:", newComment);
       const comment = await CommentService.createComment(id, newComment);
+      console.log("Comment submitted successfully:", comment);
+
       setComments((prev) => [comment, ...prev]);
       setNewComment("");
       toast.success("Comment posted successfully!");
     } catch (err: unknown) {
       console.error("Failed to post comment:", err);
-      toast.error("Failed to post comment");
+
+      // More detailed error handling
+      if (axios.isAxiosError(err)) {
+        const status = err.response?.status;
+        const errorMessage = err.response?.data?.message || "Unknown error";
+
+        console.error(`API Error (${status}):`, errorMessage);
+
+        if (status === 401) {
+          toast.error("Your session has expired. Please log in again.");
+          navigate("/login");
+        } else if (status === 400) {
+          toast.error(`Invalid comment: ${errorMessage}`);
+        } else {
+          toast.error(`Failed to post comment: ${errorMessage}`);
+        }
+      } else {
+        toast.error("Failed to post comment. Please try again later.");
+      }
     } finally {
       setIsSubmittingComment(false);
     }

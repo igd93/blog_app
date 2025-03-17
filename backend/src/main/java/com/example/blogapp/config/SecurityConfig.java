@@ -58,6 +58,11 @@ public class SecurityConfig {
                     // Public read-only blog endpoints
                     auth.requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll();
                     auth.requestMatchers(HttpMethod.GET, "/api/tags/**").permitAll();
+                    auth.requestMatchers(HttpMethod.GET, "/api/comments/test-auth").permitAll();
+                    // Comment operations - require authentication but explicitly allowed
+                    auth.requestMatchers(HttpMethod.POST, "/api/posts/*/comments").authenticated();
+                    auth.requestMatchers(HttpMethod.PUT, "/api/comments/**").authenticated();
+                    auth.requestMatchers(HttpMethod.DELETE, "/api/comments/**").authenticated();
                     // All other endpoints require authentication
                     auth.anyRequest().authenticated();
                 })
