@@ -69,6 +69,13 @@ describe("BlogDetailPage", () => {
     vi.mocked(BlogService.getPost).mockResolvedValue(mockPost);
     vi.mocked(CommentService.getPostComments).mockResolvedValue(mockComments);
     vi.mocked(AuthService.isAuthenticated).mockReturnValue(false);
+    vi.mocked(AuthService.getCurrentUser).mockResolvedValue({
+      id: "1",
+      username: "testuser",
+      email: "test@example.com",
+      fullName: "Test User",
+      avatarUrl: "test.jpg",
+    });
   });
 
   const renderWithRouter = () => {
@@ -137,6 +144,7 @@ describe("BlogDetailPage", () => {
   });
 
   it("allows commenting when user is authenticated", async () => {
+    // Mock authenticated state
     vi.mocked(AuthService.isAuthenticated).mockReturnValue(true);
     vi.mocked(CommentService.createComment).mockResolvedValue({
       id: "2",
@@ -146,30 +154,28 @@ describe("BlogDetailPage", () => {
       updatedAt: "2024-03-06T12:00:00Z",
       author: {
         id: "1",
-        username: "johndoe",
-        email: "john@example.com",
-        fullName: "John Doe",
+        username: "testuser",
+        email: "test@example.com",
+        fullName: "Test User",
         avatarUrl: "test.jpg",
       },
     });
 
     renderWithRouter();
 
-    // Wait for the component to load
+    // Wait for the component to load and get the current user
     await waitFor(() => {
-      expect(
-        screen.getByPlaceholderText("Write a comment...")
-      ).toBeInTheDocument();
+      expect(screen.getByText(mockPost.title)).toBeInTheDocument();
     });
 
-    // Fill in the comment and submit
-    const textarea = screen.getByPlaceholderText("Write a comment...");
-    fireEvent.change(textarea, { target: { value: "New comment" } });
+    // Find and fill the comment form
+    const commentInput = screen.getByPlaceholderText(/write a comment/i);
+    const submitButton = screen.getByRole("button", { name: "Post Comment" });
 
-    const submitButton = screen.getByText("Post Comment");
-    await fireEvent.click(submitButton);
+    fireEvent.change(commentInput, { target: { value: "New comment" } });
+    fireEvent.click(submitButton);
 
-    // Verify service was called and toast was shown
+    // Verify the comment was created
     await waitFor(() => {
       expect(CommentService.createComment).toHaveBeenCalledWith(
         "1",

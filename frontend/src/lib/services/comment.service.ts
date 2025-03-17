@@ -22,10 +22,27 @@ export class CommentService {
     postId: string,
     content: string
   ): Promise<Comment> {
-    const response = await api.post<Comment>(`/posts/${postId}/comments`, {
-      content,
-    });
-    return response.data;
+    console.log(`Creating comment for post ${postId} with content: ${content}`);
+
+    // Log authentication token (masked for security)
+    const token = localStorage.getItem("token");
+    console.log(`Auth token exists: ${!!token}`);
+    if (token) {
+      const maskedToken =
+        token.substring(0, 10) + "..." + token.substring(token.length - 10);
+      console.log(`Auth token (masked): ${maskedToken}`);
+    }
+
+    try {
+      const response = await api.post<Comment>(`/posts/${postId}/comments`, {
+        content,
+      });
+      console.log("Comment created successfully:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating comment:", error);
+      throw error;
+    }
   }
 
   static async updateComment(id: string, content: string): Promise<Comment> {
@@ -35,5 +52,25 @@ export class CommentService {
 
   static async deleteComment(id: string): Promise<void> {
     await api.delete(`/comments/${id}`);
+  }
+
+  static async testAuth(): Promise<string> {
+    // Log authentication token (masked for security)
+    const token = localStorage.getItem("token");
+    console.log(`Test Auth - Auth token exists: ${!!token}`);
+    if (token) {
+      const maskedToken =
+        token.substring(0, 10) + "..." + token.substring(token.length - 10);
+      console.log(`Test Auth - Auth token (masked): ${maskedToken}`);
+    }
+
+    try {
+      const response = await api.get<string>("/comments/test-auth");
+      console.log("Auth test successful:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Auth test failed:", error);
+      throw error;
+    }
   }
 }

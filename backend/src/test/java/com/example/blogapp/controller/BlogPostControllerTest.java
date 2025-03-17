@@ -7,6 +7,8 @@ import com.example.blogapp.entity.BlogPost;
 import com.example.blogapp.entity.User;
 import com.example.blogapp.mapper.BlogPostMapper;
 import com.example.blogapp.service.BlogPostService;
+import com.example.blogapp.service.UserService;
+import com.example.blogapp.service.FileStorageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +23,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -40,218 +45,240 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureMockMvc(addFilters = false)
 class BlogPostControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+        @Autowired
+        private ObjectMapper objectMapper;
 
-    @MockBean
-    private BlogPostService blogPostService;
+        @MockBean
+        private BlogPostService blogPostService;
 
-    @MockBean
-    private BlogPostMapper blogPostMapper;
+        @MockBean
+        private BlogPostMapper blogPostMapper;
 
-    private BlogPostDTO blogPostDTO;
-    private BlogPost blogPost;
-    private UUID testId;
-    private User testUser;
-    private UserDTO testUserDTO;
+        @MockBean
+        private UserService userService;
 
-    @BeforeEach
-    void setUp() {
-        testId = UUID.randomUUID();
+        @MockBean
+        private FileStorageService fileStorageService;
 
-        testUser = new User();
-        testUser.setId(UUID.randomUUID());
-        testUser.setUsername("testuser");
+        private BlogPostDTO blogPostDTO;
+        private BlogPost blogPost;
+        private UUID testId;
+        private User testUser;
+        private UserDTO testUserDTO;
 
-        testUserDTO = UserDTO.builder()
-                .id(testUser.getId())
-                .username("testuser")
-                .build();
+        @BeforeEach
+        void setUp() {
+                testId = UUID.randomUUID();
 
-        blogPost = new BlogPost();
-        blogPost.setId(testId);
-        blogPost.setTitle("Test Post");
-        blogPost.setContent("Test content");
-        blogPost.setAuthor(testUser);
-        blogPost.setPostDate(LocalDateTime.now());
-        blogPost.setSlug("test-post");
+                testUser = new User();
+                testUser.setId(UUID.randomUUID());
+                testUser.setUsername("testuser");
 
-        blogPostDTO = BlogPostDTO.builder()
-                .id(testId)
-                .title("Test Post")
-                .content("Test content")
-                .author(testUserDTO)
-                .slug("test-post")
-                .status("DRAFT")
-                .postDate(LocalDateTime.now())
-                .tags(new HashSet<>())
-                .build();
-    }
+                testUserDTO = UserDTO.builder()
+                                .id(testUser.getId())
+                                .username("testuser")
+                                .build();
 
-    @Test
-    void getAllPosts_ShouldReturnPageOfPosts() throws Exception {
-        // Arrange
-        PageRequest expectedPageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "postDate"));
-        Page<BlogPost> postPage = new PageImpl<>(Arrays.asList(blogPost));
+                blogPost = new BlogPost();
+                blogPost.setId(testId);
+                blogPost.setTitle("Test Post");
+                blogPost.setContent("Test content");
+                blogPost.setAuthor(testUser);
+                blogPost.setPostDate(LocalDateTime.now());
+                blogPost.setSlug("test-post");
 
-        ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
-        when(blogPostService.getAllPosts(any(PageRequest.class))).thenReturn(postPage);
-        when(blogPostMapper.toDTO(blogPost)).thenReturn(blogPostDTO);
+                blogPostDTO = BlogPostDTO.builder()
+                                .id(testId)
+                                .title("Test Post")
+                                .content("Test content")
+                                .author(testUserDTO)
+                                .slug("test-post")
+                                .status("DRAFT")
+                                .postDate(LocalDateTime.now())
+                                .tags(new HashSet<>())
+                                .build();
 
-        // Act & Assert
-        mockMvc.perform(get("/api/posts")
-                .param("page", "0")
-                .param("size", "10")
-                .param("sortBy", "postDate")
-                .param("direction", "desc"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].id").value(testId.toString()))
-                .andExpect(jsonPath("$.content[0].title").value("Test Post"))
-                .andExpect(jsonPath("$.content[0].slug").value("test-post"));
+                // Set up authentication
+                Authentication auth = new UsernamePasswordAuthenticationToken(testUser, null);
+                SecurityContextHolder.getContext().setAuthentication(auth);
+        }
 
-        verify(blogPostService).getAllPosts(pageRequestCaptor.capture());
-        verify(blogPostMapper).toDTO(blogPost);
+        @Test
+        void getAllPosts_ShouldReturnPageOfPosts() throws Exception {
+                // Arrange
+                PageRequest expectedPageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "postDate"));
+                Page<BlogPost> postPage = new PageImpl<>(Arrays.asList(blogPost));
 
-        PageRequest capturedPageRequest = pageRequestCaptor.getValue();
-        assertEquals(expectedPageRequest.getPageNumber(), capturedPageRequest.getPageNumber());
-        assertEquals(expectedPageRequest.getPageSize(), capturedPageRequest.getPageSize());
-        assertEquals(expectedPageRequest.getSort(), capturedPageRequest.getSort());
-    }
+                ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
+                when(blogPostService.getAllPosts(any(PageRequest.class))).thenReturn(postPage);
+                when(blogPostMapper.toDTO(blogPost)).thenReturn(blogPostDTO);
 
-    @Test
-    void getAllPosts_WithInvalidSortDirection_ShouldReturnBadRequest() throws Exception {
-        mockMvc.perform(get("/api/posts")
-                .param("direction", "invalid"))
-                .andExpect(status().isBadRequest());
-    }
+                // Act & Assert
+                mockMvc.perform(get("/api/posts")
+                                .param("page", "0")
+                                .param("size", "10")
+                                .param("sortBy", "postDate")
+                                .param("direction", "desc"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.content[0].id").value(testId.toString()))
+                                .andExpect(jsonPath("$.content[0].title").value("Test Post"))
+                                .andExpect(jsonPath("$.content[0].slug").value("test-post"));
 
-    @Test
-    void getAllPosts_WithNegativePage_ShouldReturnBadRequest() throws Exception {
-        mockMvc.perform(get("/api/posts")
-                .param("page", "-1"))
-                .andExpect(status().isBadRequest());
-    }
+                verify(blogPostService).getAllPosts(pageRequestCaptor.capture());
+                verify(blogPostMapper).toDTO(blogPost);
 
-    @Test
-    void getAllPosts_WithNegativeSize_ShouldReturnBadRequest() throws Exception {
-        mockMvc.perform(get("/api/posts")
-                .param("size", "-1"))
-                .andExpect(status().isBadRequest());
-    }
+                PageRequest capturedPageRequest = pageRequestCaptor.getValue();
+                assertEquals(expectedPageRequest.getPageNumber(), capturedPageRequest.getPageNumber());
+                assertEquals(expectedPageRequest.getPageSize(), capturedPageRequest.getPageSize());
+                assertEquals(expectedPageRequest.getSort(), capturedPageRequest.getSort());
+        }
 
-    @Test
-    void getPostById_WithExistingId_ShouldReturnPost() throws Exception {
-        // Arrange
-        when(blogPostService.getPostById(testId)).thenReturn(Optional.of(blogPost));
-        when(blogPostMapper.toDTO(blogPost)).thenReturn(blogPostDTO);
+        @Test
+        void getAllPosts_WithInvalidSortDirection_ShouldReturnBadRequest() throws Exception {
+                mockMvc.perform(get("/api/posts")
+                                .param("direction", "invalid"))
+                                .andExpect(status().isBadRequest());
+        }
 
-        // Act & Assert
-        mockMvc.perform(get("/api/posts/{id}", testId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(testId.toString()))
-                .andExpect(jsonPath("$.title").value("Test Post"));
-    }
+        @Test
+        void getAllPosts_WithNegativePage_ShouldReturnBadRequest() throws Exception {
+                mockMvc.perform(get("/api/posts")
+                                .param("page", "-1"))
+                                .andExpect(status().isBadRequest());
+        }
 
-    @Test
-    void getPostById_WithNonExistingId_ShouldReturnNotFound() throws Exception {
-        // Arrange
-        when(blogPostService.getPostById(testId)).thenReturn(Optional.empty());
+        @Test
+        void getAllPosts_WithNegativeSize_ShouldReturnBadRequest() throws Exception {
+                mockMvc.perform(get("/api/posts")
+                                .param("size", "-1"))
+                                .andExpect(status().isBadRequest());
+        }
 
-        // Act & Assert
-        mockMvc.perform(get("/api/posts/{id}", testId))
-                .andExpect(status().isNotFound());
-    }
+        @Test
+        void getPostById_WithExistingId_ShouldReturnPost() throws Exception {
+                // Arrange
+                when(blogPostService.getPostById(testId)).thenReturn(Optional.of(blogPost));
+                when(blogPostMapper.toDTO(blogPost)).thenReturn(blogPostDTO);
 
-    @Test
-    void createPost_WithValidData_ShouldReturnCreatedPost() throws Exception {
-        // Arrange
-        when(blogPostMapper.toEntity(any(BlogPostDTO.class))).thenReturn(blogPost);
-        when(blogPostService.createPost(any(BlogPost.class))).thenReturn(blogPost);
-        when(blogPostMapper.toDTO(blogPost)).thenReturn(blogPostDTO);
+                // Act & Assert
+                mockMvc.perform(get("/api/posts/{id}", testId))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.id").value(testId.toString()))
+                                .andExpect(jsonPath("$.title").value("Test Post"));
 
-        // Act & Assert
-        mockMvc.perform(post("/api/posts")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(blogPostDTO)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.title").value("Test Post"))
-                .andExpect(jsonPath("$.content").value("Test content"));
+                verify(blogPostService).getPostById(testId);
+                verify(blogPostMapper).toDTO(blogPost);
+        }
 
-        verify(blogPostMapper).toEntity(any(BlogPostDTO.class));
-        verify(blogPostService).createPost(any(BlogPost.class));
-        verify(blogPostMapper).toDTO(blogPost);
-    }
+        @Test
+        void getPostById_WithNonExistingId_ShouldReturnNotFound() throws Exception {
+                // Arrange
+                when(blogPostService.getPostById(testId)).thenReturn(Optional.empty());
 
-    @Test
-    void createPost_WithInvalidData_ShouldReturnBadRequest() throws Exception {
-        // Arrange
-        BlogPostDTO invalidPost = BlogPostDTO.builder()
-                .title("") // Invalid: empty title
-                .content("Test content")
-                .author(testUserDTO)
-                .status("DRAFT")
-                .build();
+                // Act & Assert
+                mockMvc.perform(get("/api/posts/{id}", testId))
+                                .andExpect(status().isNotFound());
 
-        // Act & Assert
-        mockMvc.perform(post("/api/posts")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(invalidPost)))
-                .andExpect(status().isBadRequest());
-    }
+                verify(blogPostService).getPostById(testId);
+        }
 
-    @Test
-    void updatePost_WithExistingId_ShouldReturnUpdatedPost() throws Exception {
-        // Arrange
-        when(blogPostService.getPostById(testId)).thenReturn(Optional.of(blogPost));
-        when(blogPostMapper.toEntity(any(BlogPostDTO.class))).thenReturn(blogPost);
-        when(blogPostService.updatePost(any(BlogPost.class))).thenReturn(blogPost);
-        when(blogPostMapper.toDTO(blogPost)).thenReturn(blogPostDTO);
+        @Test
+        void createPost_WithValidData_ShouldReturnCreatedPost() throws Exception {
+                // Arrange
+                when(blogPostMapper.toEntity(any(BlogPostDTO.class))).thenReturn(blogPost);
+                when(blogPostService.createPost(any(BlogPost.class))).thenReturn(blogPost);
+                when(blogPostMapper.toDTO(blogPost)).thenReturn(blogPostDTO);
 
-        // Act & Assert
-        mockMvc.perform(put("/api/posts/{id}", testId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(blogPostDTO)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(testId.toString()))
-                .andExpect(jsonPath("$.title").value("Test Post"));
-    }
+                // Act & Assert
+                mockMvc.perform(post("/api/posts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(blogPostDTO)))
+                                .andExpect(status().isCreated())
+                                .andExpect(jsonPath("$.title").value("Test Post"))
+                                .andExpect(jsonPath("$.content").value("Test content"));
 
-    @Test
-    void updatePost_WithNonExistingId_ShouldReturnNotFound() throws Exception {
-        // Arrange
-        when(blogPostService.getPostById(testId)).thenReturn(Optional.empty());
+                verify(blogPostMapper).toEntity(any(BlogPostDTO.class));
+                verify(blogPostService).createPost(any(BlogPost.class));
+                verify(blogPostMapper).toDTO(blogPost);
+        }
 
-        // Act & Assert
-        mockMvc.perform(put("/api/posts/{id}", testId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(blogPostDTO)))
-                .andExpect(status().isNotFound());
-    }
+        @Test
+        void createPost_WithInvalidData_ShouldReturnBadRequest() throws Exception {
+                // Arrange
+                BlogPostDTO invalidPost = BlogPostDTO.builder()
+                                .title("") // Invalid: empty title
+                                .content("Test content")
+                                .author(testUserDTO)
+                                .status("DRAFT")
+                                .build();
 
-    @Test
-    void deletePost_WithExistingId_ShouldReturnNoContent() throws Exception {
-        // Arrange
-        when(blogPostService.getPostById(testId)).thenReturn(Optional.of(blogPost));
+                // Act & Assert
+                mockMvc.perform(post("/api/posts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(invalidPost)))
+                                .andExpect(status().isBadRequest());
+        }
 
-        // Act & Assert
-        mockMvc.perform(delete("/api/posts/{id}", testId))
-                .andExpect(status().isNoContent());
+        @Test
+        void updatePost_WithExistingId_ShouldReturnUpdatedPost() throws Exception {
+                // Arrange
+                when(blogPostService.getPostById(testId)).thenReturn(Optional.of(blogPost));
+                when(blogPostMapper.toEntity(any(BlogPostDTO.class))).thenReturn(blogPost);
+                when(blogPostService.updatePost(any(BlogPost.class))).thenReturn(blogPost);
+                when(blogPostMapper.toDTO(blogPost)).thenReturn(blogPostDTO);
 
-        verify(blogPostService).deletePost(testId);
-    }
+                // Act & Assert
+                mockMvc.perform(put("/api/posts/{id}", testId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(blogPostDTO)))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.id").value(testId.toString()))
+                                .andExpect(jsonPath("$.title").value("Test Post"));
 
-    @Test
-    void deletePost_WithNonExistingId_ShouldReturnNotFound() throws Exception {
-        // Arrange
-        when(blogPostService.getPostById(testId)).thenReturn(Optional.empty());
+                verify(blogPostService).getPostById(testId);
+                verify(blogPostMapper).toEntity(any(BlogPostDTO.class));
+                verify(blogPostService).updatePost(any(BlogPost.class));
+                verify(blogPostMapper).toDTO(blogPost);
+        }
 
-        // Act & Assert
-        mockMvc.perform(delete("/api/posts/{id}", testId))
-                .andExpect(status().isNotFound());
+        @Test
+        void updatePost_WithNonExistingId_ShouldReturnNotFound() throws Exception {
+                // Arrange
+                when(blogPostService.getPostById(testId)).thenReturn(Optional.empty());
 
-        verify(blogPostService, never()).deletePost(any());
-    }
+                // Act & Assert
+                mockMvc.perform(put("/api/posts/{id}", testId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(blogPostDTO)))
+                                .andExpect(status().isNotFound());
+        }
+
+        @Test
+        void deletePost_WithExistingId_ShouldReturnNoContent() throws Exception {
+                // Arrange
+                when(blogPostService.getPostById(testId)).thenReturn(Optional.of(blogPost));
+
+                // Act & Assert
+                mockMvc.perform(delete("/api/posts/{id}", testId))
+                                .andExpect(status().isNoContent());
+
+                verify(blogPostService).getPostById(testId);
+                verify(blogPostService).deletePost(testId);
+        }
+
+        @Test
+        void deletePost_WithNonExistingId_ShouldReturnNotFound() throws Exception {
+                // Arrange
+                when(blogPostService.getPostById(testId)).thenReturn(Optional.empty());
+
+                // Act & Assert
+                mockMvc.perform(delete("/api/posts/{id}", testId))
+                                .andExpect(status().isNotFound());
+
+                verify(blogPostService).getPostById(testId);
+                verify(blogPostService, never()).deletePost(any());
+        }
 }
