@@ -69,3 +69,9 @@ databaseChangeLog:
                   defaultValueComputed: CURRENT_TIMESTAMP
                   constraints:
                     nullable: false
+        - addCheckConstraint:
+            tableName: blog_posts
+            constraintName: check_blog_post_status
+            columnNames: status
+            validate: true
+            checkExpression: status IN ('PUBLISHED', 'DRAFT')
