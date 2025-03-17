@@ -4,7 +4,9 @@ WORKDIR /app
 
 # Install dependencies first to leverage caching
 COPY package*.json ./
-RUN yarn install
+# Clean cache and install dependencies with specific version
+RUN yarn cache clean && \
+    yarn install --frozen-lockfile
 
 # Copy the source code and expose the dev port
 COPY . .
