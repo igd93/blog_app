@@ -4,6 +4,7 @@ import com.example.blogapp.entity.BlogPost;
 import com.example.blogapp.entity.User;
 import com.example.blogapp.repository.BlogPostRepository;
 import com.example.blogapp.service.BlogPostService;
+import com.example.blogapp.util.BlogPostStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +18,7 @@ import java.util.UUID;
 import java.util.Locale;
 import java.util.regex.Pattern;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -76,7 +78,15 @@ public class BlogPostServiceImpl implements BlogPostService {
     @Override
     @Transactional(readOnly = true)
     public List<BlogPost> getPostsByStatus(String status) {
-        return blogPostRepository.findByStatusOrderByPostDateDesc(status);
+        // Convert string to enum
+        try {
+            BlogPostStatus postStatus = BlogPostStatus.valueOf(status);
+            return blogPostRepository.findByStatusOrderByPostDateDesc(postStatus);
+        } catch (IllegalArgumentException e) {
+            // Log error and return empty list for invalid status
+            System.err.println("Invalid status value: " + status);
+            return new ArrayList<>();
+        }
     }
 
     @Override
@@ -94,7 +104,25 @@ public class BlogPostServiceImpl implements BlogPostService {
     @Override
     @Transactional(readOnly = true)
     public Page<BlogPost> searchPosts(String query, Pageable pageable) {
-        return blogPostRepository.searchPosts(query, pageable);
+        return blogPostRepository.searchPosts(query, BlogPostStatus.PUBLISHED, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<BlogPost> getPublishedPosts(Pageable pageable) {
+        System.out.println("Filtering posts for status: " + BlogPostStatus.PUBLISHED);
+        // Use the enum
+        Page<BlogPost> result = blogPostRepository.findByStatus(BlogPostStatus.PUBLISHED, pageable);
+
+        System.out.println("Found " + result.getTotalElements() + " published posts");
+
+        // List all blog posts for debugging
+        System.out.println("Listing all blog posts in database:");
+        blogPostRepository.findAll().forEach(post -> {
+            System.out.println("ID: " + post.getId() + ", Title: " + post.getTitle() + ", Status: " + post.getStatus());
+        });
+
+        return result;
     }
 
     @Override

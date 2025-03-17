@@ -35,6 +35,15 @@ import {
 import { toast } from "sonner";
 import { Pencil, Trash2, Plus, FileImage } from "lucide-react";
 
+type BlogPostStatus = "PUBLISHED" | "DRAFT";
+
+type FormData = {
+  title: string;
+  description: string;
+  content: string;
+  status: BlogPostStatus;
+};
+
 export default function MyPublicationsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -44,7 +53,7 @@ export default function MyPublicationsPage() {
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     title: "",
     description: "",
     content: "",
@@ -103,12 +112,15 @@ export default function MyPublicationsPage() {
     });
   };
 
-  // Handle status select change
+  // Handle status select change (accept string but validate it's a valid status)
   const handleStatusChange = (value: string) => {
-    setFormData({
-      ...formData,
-      status: value,
-    });
+    // Validate that the value is a valid BlogPostStatus
+    if (value === "PUBLISHED" || value === "DRAFT") {
+      setFormData({
+        ...formData,
+        status: value,
+      });
+    }
   };
 
   // Handle image selection

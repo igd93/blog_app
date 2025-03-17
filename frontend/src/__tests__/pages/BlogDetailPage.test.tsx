@@ -34,7 +34,7 @@ const mockPost = {
   readTime: "5 min read",
   tags: [{ id: "1", name: "test", slug: "test" }],
   slug: "test-post",
-  status: "PUBLISHED",
+  status: "PUBLISHED" as const,
 };
 
 const mockComments = {
@@ -234,6 +234,20 @@ describe("BlogDetailPage", () => {
     await waitFor(() => {
       expect(navigator.clipboard.writeText).toHaveBeenCalled();
       expect(toast.success).toHaveBeenCalledWith("Link copied to clipboard!");
+    });
+  });
+
+  it("handles 404 when trying to access draft post", async () => {
+    // Mock a 404 response for a draft post
+    vi.mocked(BlogService.getPost).mockRejectedValueOnce({
+      response: { status: 404 },
+    });
+
+    renderWithRouter();
+
+    // Wait for the error toast to appear
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Failed to load blog post");
     });
   });
 });

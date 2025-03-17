@@ -7,6 +7,7 @@ import com.example.blogapp.mapper.BlogPostMapper;
 import com.example.blogapp.service.BlogPostService;
 import com.example.blogapp.service.FileStorageService;
 import com.example.blogapp.service.UserService;
+import com.example.blogapp.util.BlogPostStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,8 +59,16 @@ public class BlogPostController {
 
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
 
-        Page<BlogPostDTO> posts = blogPostService.getAllPosts(pageRequest)
+        System.out.println("=== Getting posts with getPublishedPosts method ===");
+        // Changed to only get published posts
+        Page<BlogPostDTO> posts = blogPostService.getPublishedPosts(pageRequest)
                 .map(blogPostMapper::toDTO);
+
+        // Print all posts for debugging
+        System.out.println("Found " + posts.getTotalElements() + " posts");
+        posts.getContent().forEach(post -> {
+            System.out.println("Post: " + post.getTitle() + ", Status: " + post.getStatus());
+        });
 
         return ResponseEntity.ok(posts);
     }
@@ -66,8 +76,15 @@ public class BlogPostController {
     @GetMapping("/{id}")
     public ResponseEntity<BlogPostDTO> getPostById(@PathVariable UUID id) {
         return blogPostService.getPostById(id)
-                .map(blogPostMapper::toDTO)
-                .map(ResponseEntity::ok)
+                .map(post -> {
+                    // If the post is not published, it should not be accessible
+                    if (post.getStatus() != BlogPostStatus.PUBLISHED) {
+                        // In a real application, you might want to check if the current user
+                        // is the author of the post before returning a 404
+                        return ResponseEntity.notFound().<BlogPostDTO>build();
+                    }
+                    return ResponseEntity.ok(blogPostMapper.toDTO(post));
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -207,5 +224,37 @@ public class BlogPostController {
                     notFoundResponse.put("error", "Post not found");
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(notFoundResponse);
                 });
+    }
+
+    // Admin endpoint to check database status
+    @GetMapping("/admin/status-check")
+    public ResponseEntity<Map<String, Object>> checkPostStatuses() {
+        Map<String, Object> statusReport = new HashMap<>();
+
+        // Use Pageable with a high max value to get all posts since we don't have a
+        // direct method
+        PageRequest allPostsRequest = PageRequest.of(0, 1000);
+        Page<BlogPost> postsPage = blogPostService.getAllPosts(allPostsRequest);
+        List<BlogPost> allPosts = postsPage.getContent();
+
+        statusReport.put("totalPosts", allPosts.size());
+
+        // Group by status and convert enum to string for the response
+        Map<String, Long> statusCounts = allPosts.stream()
+                .collect(Collectors.groupingBy(post -> post.getStatus().name(), Collectors.counting()));
+        statusReport.put("statusCounts", statusCounts);
+
+        // List all statuses with post IDs
+        Map<String, List<String>> postsByStatus = new HashMap<>();
+        for (BlogPost post : allPosts) {
+            String statusName = post.getStatus().name();
+            if (!postsByStatus.containsKey(statusName)) {
+                postsByStatus.put(statusName, new ArrayList<>());
+            }
+            postsByStatus.get(statusName).add(post.getId() + ": " + post.getTitle());
+        }
+        statusReport.put("postsByStatus", postsByStatus);
+
+        return ResponseEntity.ok(statusReport);
     }
 }

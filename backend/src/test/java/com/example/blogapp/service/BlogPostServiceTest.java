@@ -4,6 +4,7 @@ import com.example.blogapp.entity.BlogPost;
 import com.example.blogapp.entity.User;
 import com.example.blogapp.repository.BlogPostRepository;
 import com.example.blogapp.service.impl.BlogPostServiceImpl;
+import com.example.blogapp.util.BlogPostStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,7 +50,7 @@ class BlogPostServiceTest {
         testPost.setTitle("Test Blog Post");
         testPost.setContent("Test content");
         testPost.setAuthor(testUser);
-        testPost.setStatus("DRAFT");
+        testPost.setStatus(BlogPostStatus.DRAFT);
     }
 
     @Test
@@ -134,9 +135,25 @@ class BlogPostServiceTest {
     }
 
     @Test
-    void getPostsByStatus_WithValidStatus_ShouldReturnPosts() {
+    void getPostsByStatus_WithValidStatusString_ShouldReturnPosts() {
         // Arrange
         String status = "DRAFT";
+        List<BlogPost> expectedPosts = Arrays.asList(testPost);
+        when(blogPostRepository.findByStatusOrderByPostDateDesc(BlogPostStatus.DRAFT)).thenReturn(expectedPosts);
+
+        // Act
+        List<BlogPost> result = blogPostService.getPostsByStatus(status);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(BlogPostStatus.DRAFT, result.get(0).getStatus());
+    }
+
+    @Test
+    void getPostsByStatus_WithValidStatusEnum_ShouldReturnPosts() {
+        // Arrange
+        BlogPostStatus status = BlogPostStatus.DRAFT;
         List<BlogPost> expectedPosts = Arrays.asList(testPost);
         when(blogPostRepository.findByStatusOrderByPostDateDesc(status)).thenReturn(expectedPosts);
 
@@ -147,6 +164,28 @@ class BlogPostServiceTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(status, result.get(0).getStatus());
+    }
+
+    @Test
+    void getPublishedPosts_ShouldReturnOnlyPublishedPosts() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10);
+        BlogPost publishedPost = new BlogPost();
+        publishedPost.setId(UUID.randomUUID());
+        publishedPost.setTitle("Published Post");
+        publishedPost.setStatus(BlogPostStatus.PUBLISHED);
+
+        Page<BlogPost> expectedPage = new PageImpl<>(Arrays.asList(publishedPost), pageable, 1);
+        when(blogPostRepository.findByStatus(BlogPostStatus.PUBLISHED, pageable)).thenReturn(expectedPage);
+
+        // Act
+        Page<BlogPost> result = blogPostService.getPublishedPosts(pageable);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        assertEquals(BlogPostStatus.PUBLISHED, result.getContent().get(0).getStatus());
+        verify(blogPostRepository).findByStatus(BlogPostStatus.PUBLISHED, pageable);
     }
 
     @Test
@@ -207,5 +246,35 @@ class BlogPostServiceTest {
         // Assert
         assertNotNull(slug);
         assertEquals("test-blog-post-1", slug);
+    }
+
+    @Test
+    void searchPosts_ShouldOnlyReturnPublishedPosts() {
+        // Arrange
+        String query = "test";
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // Create a published post that matches the query
+        BlogPost publishedPost = new BlogPost();
+        publishedPost.setId(UUID.randomUUID());
+        publishedPost.setTitle("Test Published Post");
+        publishedPost.setContent("Test content");
+        publishedPost.setStatus(BlogPostStatus.PUBLISHED);
+
+        Page<BlogPost> expectedResults = new PageImpl<>(Arrays.asList(publishedPost), pageable, 1);
+
+        when(blogPostRepository.searchPosts(query, BlogPostStatus.PUBLISHED, pageable)).thenReturn(expectedResults);
+
+        // Act
+        Page<BlogPost> result = blogPostService.searchPosts(query, pageable);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        assertEquals("Test Published Post", result.getContent().get(0).getTitle());
+        assertEquals(BlogPostStatus.PUBLISHED, result.getContent().get(0).getStatus());
+
+        // Verify that only published posts were searched
+        verify(blogPostRepository).searchPosts(query, BlogPostStatus.PUBLISHED, pageable);
     }
 }

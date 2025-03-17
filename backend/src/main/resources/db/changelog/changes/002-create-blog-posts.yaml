@@ -69,3 +69,5 @@ databaseChangeLog:
                   defaultValueComputed: CURRENT_TIMESTAMP
                   constraints:
                     nullable: false
+        - sql:
+            sql: ALTER TABLE blog_posts ADD CONSTRAINT check_blog_post_status CHECK (status IN ('PUBLISHED', 'DRAFT'));

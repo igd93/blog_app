@@ -48,7 +48,11 @@ export default function BlogDetailPage() {
         setComments(commentsData.content);
       } catch (err: unknown) {
         console.error("Failed to load blog post:", err);
-        toast.error("Failed to load blog post");
+        if (axios.isAxiosError(err) && err.response?.status === 404) {
+          toast.error("This post doesn't exist or has been unpublished");
+        } else {
+          toast.error("Failed to load blog post");
+        }
         navigate("/");
       } finally {
         setIsLoading(false);
