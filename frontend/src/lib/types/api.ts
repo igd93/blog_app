@@ -13,7 +13,7 @@ export interface BlogPost {
   slug: string;
   description?: string;
   content: string;
-  status: string;
+  status: "PUBLISHED" | "DRAFT";
   postDate: string;
   readTime: string;
   imageUrl?: string;
