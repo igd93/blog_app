@@ -348,7 +348,7 @@ export default function BlogDetailPage() {
                         {new Date(comment.createdAt).toLocaleDateString()}
                       </span>
                     </div>
-                    <p className="text-sm">{comment.content}</p>
+                    <p className="text-sm text-left">{comment.content}</p>
                   </div>
                 </div>
               ))}
