@@ -2,6 +2,7 @@ package com.example.blogapp.service;
 
 import com.example.blogapp.entity.BlogPost;
 import com.example.blogapp.entity.User;
+import com.example.blogapp.util.BlogPostStatus;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -22,6 +23,12 @@ public interface BlogPostService {
     List<BlogPost> getPostsByAuthor(User author);
 
     List<BlogPost> getPostsByStatus(String status);
+
+    default List<BlogPost> getPostsByStatus(BlogPostStatus status) {
+        return getPostsByStatus(status.name());
+    }
+
+    Page<BlogPost> getPublishedPosts(Pageable pageable);
 
     boolean existsBySlug(String slug);
 

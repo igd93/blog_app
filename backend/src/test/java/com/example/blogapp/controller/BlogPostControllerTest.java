@@ -9,6 +9,7 @@ import com.example.blogapp.mapper.BlogPostMapper;
 import com.example.blogapp.service.BlogPostService;
 import com.example.blogapp.service.UserService;
 import com.example.blogapp.service.FileStorageService;
+import com.example.blogapp.util.BlogPostStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -89,6 +90,7 @@ class BlogPostControllerTest {
                 blogPost.setAuthor(testUser);
                 blogPost.setPostDate(LocalDateTime.now());
                 blogPost.setSlug("test-post");
+                blogPost.setStatus(BlogPostStatus.DRAFT);
 
                 blogPostDTO = BlogPostDTO.builder()
                                 .id(testId)
@@ -96,7 +98,7 @@ class BlogPostControllerTest {
                                 .content("Test content")
                                 .author(testUserDTO)
                                 .slug("test-post")
-                                .status("DRAFT")
+                                .status(BlogPostStatus.DRAFT)
                                 .postDate(LocalDateTime.now())
                                 .tags(new HashSet<>())
                                 .build();
@@ -186,6 +188,27 @@ class BlogPostControllerTest {
         }
 
         @Test
+        void getPostById_WithDraftPost_ShouldReturnNotFound() throws Exception {
+                // Arrange
+                BlogPost draftPost = new BlogPost();
+                draftPost.setId(testId);
+                draftPost.setTitle("Draft Post");
+                draftPost.setContent("Draft content");
+                draftPost.setAuthor(testUser);
+                draftPost.setStatus(BlogPostStatus.DRAFT);
+
+                when(blogPostService.getPostById(testId)).thenReturn(Optional.of(draftPost));
+
+                // Act & Assert
+                mockMvc.perform(get("/api/posts/{id}", testId))
+                                .andExpect(status().isNotFound());
+
+                verify(blogPostService).getPostById(testId);
+                // Verify that toDTO was never called since the post should be filtered out
+                verify(blogPostMapper, never()).toDTO(draftPost);
+        }
+
+        @Test
         void createPost_WithValidData_ShouldReturnCreatedPost() throws Exception {
                 // Arrange
                 when(blogPostMapper.toEntity(any(BlogPostDTO.class))).thenReturn(blogPost);
@@ -212,7 +235,7 @@ class BlogPostControllerTest {
                                 .title("") // Invalid: empty title
                                 .content("Test content")
                                 .author(testUserDTO)
-                                .status("DRAFT")
+                                .status(BlogPostStatus.DRAFT)
                                 .build();
 
                 // Act & Assert
@@ -280,5 +303,55 @@ class BlogPostControllerTest {
 
                 verify(blogPostService).getPostById(testId);
                 verify(blogPostService, never()).deletePost(any());
+        }
+
+        @Test
+        void getAllPosts_ShouldReturnOnlyPublishedPosts() throws Exception {
+                // Arrange
+                PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "postDate"));
+
+                // Create a published post
+                BlogPost publishedPost = new BlogPost();
+                publishedPost.setId(UUID.randomUUID());
+                publishedPost.setTitle("Published Post");
+                publishedPost.setContent("Published content");
+                publishedPost.setAuthor(testUser);
+                publishedPost.setStatus(BlogPostStatus.PUBLISHED);
+
+                // Create a draft post
+                BlogPost draftPost = new BlogPost();
+                draftPost.setId(UUID.randomUUID());
+                draftPost.setTitle("Draft Post");
+                draftPost.setContent("Draft content");
+                draftPost.setAuthor(testUser);
+                draftPost.setStatus(BlogPostStatus.DRAFT);
+
+                // Expect only published posts to be returned
+                Page<BlogPost> publishedPostsPage = new PageImpl<>(Arrays.asList(publishedPost));
+
+                // Set up DTO for the published post
+                BlogPostDTO publishedPostDTO = BlogPostDTO.builder()
+                                .id(publishedPost.getId())
+                                .title("Published Post")
+                                .content("Published content")
+                                .author(testUserDTO)
+                                .status(BlogPostStatus.PUBLISHED)
+                                .build();
+
+                when(blogPostService.getPublishedPosts(any(PageRequest.class))).thenReturn(publishedPostsPage);
+                when(blogPostMapper.toDTO(publishedPost)).thenReturn(publishedPostDTO);
+
+                // Act & Assert
+                mockMvc.perform(get("/api/posts"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.content.length()").value(1))
+                                .andExpect(jsonPath("$.content[0].title").value("Published Post"))
+                                .andExpect(jsonPath("$.content[0].status").value("PUBLISHED"));
+
+                // Verify that getPublishedPosts was called, not getAllPosts
+                verify(blogPostService).getPublishedPosts(any(PageRequest.class));
+                verify(blogPostMapper).toDTO(publishedPost);
+                // Verify that the draft post was not included
+                verify(blogPostMapper, never()).toDTO(draftPost);
         }
 }

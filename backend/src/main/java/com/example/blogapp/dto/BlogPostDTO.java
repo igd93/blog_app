@@ -1,5 +1,6 @@
 package com.example.blogapp.dto;
 
+import com.example.blogapp.util.BlogPostStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -31,8 +32,8 @@ public class BlogPostDTO {
     @NotBlank(message = "Content is required")
     private String content;
 
-    @NotBlank(message = "Status is required")
-    private String status;
+    @NotNull(message = "Status is required")
+    private BlogPostStatus status;
 
     private LocalDateTime postDate;
 

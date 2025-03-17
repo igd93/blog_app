@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import com.example.blogapp.util.BlogPostStatus;
+
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Entity(name = "blog_post")
@@ -36,7 +38,8 @@ public class BlogPost extends BaseEntity {
     private User author;
 
     @Column(nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private BlogPostStatus status;
 
     @Column(name = "post_date")
     @JdbcTypeCode(SqlTypes.TIMESTAMP)
