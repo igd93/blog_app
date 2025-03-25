@@ -2,7 +2,6 @@ package com.example.blogapp.controller;
 
 import com.example.blogapp.dto.BlogPostDTO;
 import com.example.blogapp.entity.BlogPost;
-import com.example.blogapp.entity.User;
 import com.example.blogapp.mapper.BlogPostMapper;
 import com.example.blogapp.service.BlogPostService;
 import com.example.blogapp.service.FileStorageService;
