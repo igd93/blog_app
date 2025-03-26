@@ -1,5 +1,6 @@
 package com.example.blogapp.security;
 
+import com.example.blogapp.config.TestConfig;
 import com.example.blogapp.entity.User;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.junit.jupiter.api.BeforeEach;
@@ -7,20 +8,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(MockitoExtension.class)
-@TestPropertySource(properties = {
-        "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration,"
-                +
-                "org.springframework.boot.autoconfigure.security.reactive.ReactiveOAuth2ClientAutoConfiguration," +
-                "org.springframework.boot.autoconfigure.security.reactive.ReactiveOAuth2ResourceServerAutoConfiguration"
-})
-@TestPropertySource(locations = "classpath:application-test.properties")
+@SpringBootTest(classes = { JwtService.class, TestConfig.class })
+@ActiveProfiles("test")
 class JwtServiceTest {
 
     @InjectMocks
