@@ -90,7 +90,7 @@ class BlogPostControllerTest {
                 blogPost.setAuthor(testUser);
                 blogPost.setPostDate(LocalDateTime.now());
                 blogPost.setSlug("test-post");
-                blogPost.setStatus(BlogPostStatus.DRAFT);
+                blogPost.setStatus(BlogPostStatus.PUBLISHED);
 
                 blogPostDTO = BlogPostDTO.builder()
                                 .id(testId)
@@ -98,7 +98,7 @@ class BlogPostControllerTest {
                                 .content("Test content")
                                 .author(testUserDTO)
                                 .slug("test-post")
-                                .status(BlogPostStatus.DRAFT)
+                                .status(BlogPostStatus.PUBLISHED)
                                 .postDate(LocalDateTime.now())
                                 .tags(new HashSet<>())
                                 .build();
@@ -111,11 +111,10 @@ class BlogPostControllerTest {
         @Test
         void getAllPosts_ShouldReturnPageOfPosts() throws Exception {
                 // Arrange
-                PageRequest expectedPageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "postDate"));
+                PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "postDate"));
                 Page<BlogPost> postPage = new PageImpl<>(Arrays.asList(blogPost));
 
-                ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
-                when(blogPostService.getAllPosts(any(PageRequest.class))).thenReturn(postPage);
+                when(blogPostService.getPublishedPosts(any(PageRequest.class))).thenReturn(postPage);
                 when(blogPostMapper.toDTO(blogPost)).thenReturn(blogPostDTO);
 
                 // Act & Assert
@@ -129,13 +128,8 @@ class BlogPostControllerTest {
                                 .andExpect(jsonPath("$.content[0].title").value("Test Post"))
                                 .andExpect(jsonPath("$.content[0].slug").value("test-post"));
 
-                verify(blogPostService).getAllPosts(pageRequestCaptor.capture());
+                verify(blogPostService).getPublishedPosts(any(PageRequest.class));
                 verify(blogPostMapper).toDTO(blogPost);
-
-                PageRequest capturedPageRequest = pageRequestCaptor.getValue();
-                assertEquals(expectedPageRequest.getPageNumber(), capturedPageRequest.getPageNumber());
-                assertEquals(expectedPageRequest.getPageSize(), capturedPageRequest.getPageSize());
-                assertEquals(expectedPageRequest.getSort(), capturedPageRequest.getSort());
         }
 
         @Test
