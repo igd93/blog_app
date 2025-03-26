@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -19,19 +20,24 @@ import static org.junit.jupiter.api.Assertions.*;
                 "org.springframework.boot.autoconfigure.security.reactive.ReactiveOAuth2ClientAutoConfiguration," +
                 "org.springframework.boot.autoconfigure.security.reactive.ReactiveOAuth2ResourceServerAutoConfiguration"
 })
+@TestPropertySource(locations = "classpath:application-test.properties")
 class JwtServiceTest {
 
     @InjectMocks
     private JwtService jwtService;
 
     private User testUser;
-    private static final String SECRET_KEY = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
-    private static final long JWT_EXPIRATION = 86400000; // 24 hours in milliseconds
+
+    @Value("${jwt.secret}")
+    private String secretKey;
+
+    @Value("${jwt.expiration}")
+    private long jwtExpiration;
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(jwtService, "secretKey", SECRET_KEY);
-        ReflectionTestUtils.setField(jwtService, "jwtExpiration", JWT_EXPIRATION);
+        ReflectionTestUtils.setField(jwtService, "secretKey", secretKey);
+        ReflectionTestUtils.setField(jwtService, "jwtExpiration", jwtExpiration);
 
         testUser = new User();
         testUser.setUsername("testuser");
@@ -144,7 +150,7 @@ class JwtServiceTest {
         // Set expiration to 1 second ago
         ReflectionTestUtils.setField(jwtService, "jwtExpiration", -1000L);
         String token = jwtService.generateToken(testUser);
-        ReflectionTestUtils.setField(jwtService, "jwtExpiration", JWT_EXPIRATION);
+        ReflectionTestUtils.setField(jwtService, "jwtExpiration", jwtExpiration);
 
         // Act & Assert
         assertThrows(ExpiredJwtException.class, () -> {
