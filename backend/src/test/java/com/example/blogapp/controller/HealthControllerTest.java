@@ -21,7 +21,7 @@ class HealthControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    void health_ShouldReturnOk() throws Exception {
+    void health_ShouldReturnOkWithResponseEntity() throws Exception {
         mockMvc.perform(get("/health"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("OK"));
